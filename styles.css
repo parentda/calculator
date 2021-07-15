@@ -16,10 +16,19 @@ main {
   grid-template-rows: 100px repeat(6, auto);
   grid-template-columns: repeat(4, auto);
   grid-gap: 5px 5px;
+  padding: 20px;
+  border-radius: 20px;
+  background-color: aquamarine;
 }
 
 #display {
   grid-row: 1 / 1;
   grid-column: 1 / 5;
   text-align: right;
+}
+
+button {
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
 }
