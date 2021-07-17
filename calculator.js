@@ -1,63 +1,62 @@
-const operators = {
-  "-": {
-    value: "-",
-    notation: "infix",
-    precedence: 10,
-    associativity: "left",
-    compute: (num1, num2) => num1 - num2,
-  },
-
-  "+": {
-    value: "+",
-    notation: "infix",
-    precedence: 10,
-    associativity: "left",
-    compute: (num1, num2) => num1 + num2,
-  },
-
-  "*": {
-    value: "*",
-    notation: "infix",
-    precedence: 20,
-    associativity: "left",
-    compute: (num1, num2) => num1 * num2,
-  },
-
-  "/": {
-    value: "/",
-    notation: "infix",
-    precedence: 20,
-    associativity: "left",
-    compute: (num1, num2) => num1 / num2,
-  },
-
-  "u-": {
-    value: "u-",
-    notation: "prefix",
-    precedence: 30,
-    associativity: "left",
-    compute: (num) => -num,
-  },
-
-  "^": {
-    value: "^",
-    notation: "infix",
-    precedence: 40,
-    associativity: "right",
-    compute: (num1, num2) => num1 ** num2,
-  },
-
-  root: {
-    value: "root",
-    notation: "infix",
-    precedence: 40,
-    associativity: "right",
-    compute: (num1, num2) => num1 ** (1 / num2),
-  },
-};
-
 const Calculator = {
   displayText: "",
+  operators: {
+    "-": {
+      value: "-",
+      notation: "infix",
+      precedence: 10,
+      associativity: "left",
+      compute: (num1, num2) => num1 - num2,
+    },
+
+    "+": {
+      value: "+",
+      notation: "infix",
+      precedence: 10,
+      associativity: "left",
+      compute: (num1, num2) => num1 + num2,
+    },
+
+    "*": {
+      value: "*",
+      notation: "infix",
+      precedence: 20,
+      associativity: "left",
+      compute: (num1, num2) => num1 * num2,
+    },
+
+    "/": {
+      value: "/",
+      notation: "infix",
+      precedence: 20,
+      associativity: "left",
+      compute: (num1, num2) => num1 / num2,
+    },
+
+    "u-": {
+      value: "u-",
+      notation: "prefix",
+      precedence: 30,
+      associativity: "left",
+      compute: (num) => -num,
+    },
+
+    "^": {
+      value: "^",
+      notation: "infix",
+      precedence: 40,
+      associativity: "right",
+      compute: (num1, num2) => num1 ** num2,
+    },
+
+    root: {
+      value: "root",
+      notation: "infix",
+      precedence: 40,
+      associativity: "right",
+      compute: (num1, num2) => num1 ** (1 / num2),
+    },
+  },
 };
 
 const displayTop = document.querySelector("#display-top");
@@ -105,7 +104,7 @@ function createToken(tokenType, tokenValue) {
   let token;
   switch (tokenType) {
     case "operator":
-      token = operators[tokenValue];
+      token = Calculator.operators[tokenValue];
       token.type = "operator";
       break;
 
