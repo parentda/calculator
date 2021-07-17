@@ -1,5 +1,5 @@
 const Calculator = {
-  displayText: "",
+  bottomDisplayText: "",
   operators: {
     "-": {
       value: "-",
@@ -59,12 +59,17 @@ const Calculator = {
   },
 };
 
+const tokenArray = [];
+
 const displayTop = document.querySelector("#display-top");
 const displayBottom = document.querySelector("#display-bottom");
 
-const tokenArray = [];
-
 const numberButtons = document.querySelectorAll("[data-type='number']");
+const operatorButtons = document.querySelectorAll("[data-type='operator']");
+const parenthesisButtons = document.querySelectorAll(
+  "[data-type='parenthesis']"
+);
+
 numberButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
     const buttonValue = event.target.textContent;
@@ -76,27 +81,28 @@ numberButtons.forEach((button) => {
     } else {
       createToken("number", buttonValue);
     }
-    updateDisplay(buttonValue);
+    updateBottomDisplay(buttonValue);
   });
 });
 
-const operatorButtons = document.querySelectorAll("[data-type='operator']");
 operatorButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
-    const buttonValue = event.target.getAttribute("data-value");
+    let buttonValue;
+    if (event.target.localName === "sup") {
+      buttonValue = event.target.parentElement.getAttribute("data-value");
+    } else {
+      buttonValue = event.target.getAttribute("data-value");
+    }
     createToken("operator", buttonValue);
-    updateDisplay(buttonValue);
+    updateBottomDisplay(buttonValue);
   });
 });
 
-const parenthesisButtons = document.querySelectorAll(
-  "[data-type='parenthesis']"
-);
 parenthesisButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
     const buttonValue = event.target.textContent;
     createToken("parenthesis", buttonValue);
-    updateDisplay(buttonValue);
+    updateBottomDisplay(buttonValue);
   });
 });
 
@@ -124,7 +130,7 @@ function parseTokenArray(array) {}
 
 function evaluateParsedArray(array) {}
 
-function updateDisplay(character) {
-  Calculator.displayText += `${character}`;
-  displayBottom.textContent = Calculator.displayText;
+function updateBottomDisplay(character) {
+  Calculator.bottomDisplayText += `${character}`;
+  displayBottom.textContent = Calculator.bottomDisplayText;
 }
