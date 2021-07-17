@@ -60,29 +60,33 @@ const Calculator = {
   displayText: "",
 };
 
+const displayTop = document.querySelector("#display-top");
+const displayBottom = document.querySelector("#display-bottom");
+
 const tokenArray = [];
 
 const numberButtons = document.querySelectorAll("[data-type='number']");
 numberButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
+    const buttonValue = event.target.textContent;
     if (
       tokenArray.length &&
       tokenArray[tokenArray.length - 1].type === "number"
     ) {
-      tokenArray[tokenArray.length - 1].value += event.target.textContent;
+      tokenArray[tokenArray.length - 1].value += buttonValue;
     } else {
-      const tokenValue = event.target.textContent;
-      createToken("number", tokenValue);
+      createToken("number", buttonValue);
     }
-    console.log(tokenArray);
+    updateDisplay(buttonValue);
   });
 });
 
 const operatorButtons = document.querySelectorAll("[data-type='operator']");
 operatorButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
-    const tokenValue = event.target.getAttribute("data-value");
-    createToken("operator", tokenValue);
+    const buttonValue = event.target.getAttribute("data-value");
+    createToken("operator", buttonValue);
+    updateDisplay(buttonValue);
   });
 });
 
@@ -91,8 +95,9 @@ const parenthesisButtons = document.querySelectorAll(
 );
 parenthesisButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
-    const tokenValue = event.target.textContent;
-    createToken("parenthesis", tokenValue);
+    const buttonValue = event.target.textContent;
+    createToken("parenthesis", buttonValue);
+    updateDisplay(buttonValue);
   });
 });
 
@@ -119,3 +124,8 @@ function deleteToken() {}
 function parseTokenArray(array) {}
 
 function evaluateParsedArray(array) {}
+
+function updateDisplay(character) {
+  Calculator.displayText += `${character}`;
+  displayBottom.textContent = Calculator.displayText;
+}
