@@ -1,6 +1,5 @@
 const operators = {
   "-": {
-    type: "operator",
     value: "-",
     notation: "infix",
     precedence: 10,
@@ -9,7 +8,6 @@ const operators = {
   },
 
   "+": {
-    type: "operator",
     value: "+",
     notation: "infix",
     precedence: 10,
@@ -18,7 +16,6 @@ const operators = {
   },
 
   "*": {
-    type: "operator",
     value: "*",
     notation: "infix",
     precedence: 20,
@@ -27,7 +24,6 @@ const operators = {
   },
 
   "/": {
-    type: "operator",
     value: "/",
     notation: "infix",
     precedence: 20,
@@ -36,7 +32,6 @@ const operators = {
   },
 
   "u-": {
-    type: "operator",
     value: "u-",
     notation: "prefix",
     precedence: 30,
@@ -45,7 +40,6 @@ const operators = {
   },
 
   "^": {
-    type: "operator",
     value: "^",
     notation: "infix",
     precedence: 40,
@@ -54,7 +48,6 @@ const operators = {
   },
 
   root: {
-    type: "operator",
     value: "root",
     notation: "infix",
     precedence: 40,
@@ -63,31 +56,52 @@ const operators = {
   },
 };
 
+const Calculator = {
+  displayText: "",
+};
+
+const tokenArray = [];
+
 const numberButtons = document.querySelectorAll("[data-type='number']");
 numberButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
-    const tokenType = event.target.getAttribute("data-type");
-    const tokenValue = +event.target.textContent;
-    createToken(tokenType, tokenValue);
+    if (
+      tokenArray.length &&
+      tokenArray[tokenArray.length - 1].type === "number"
+    ) {
+      tokenArray[tokenArray.length - 1].value += event.target.textContent;
+    } else {
+      const tokenValue = event.target.textContent;
+      createToken("number", tokenValue);
+    }
+    console.log(tokenArray);
   });
 });
 
 const operatorButtons = document.querySelectorAll("[data-type='operator']");
 operatorButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
-    const tokenType = event.target.getAttribute("data-type");
     const tokenValue = event.target.getAttribute("data-value");
-    createToken(tokenType, tokenValue);
+    createToken("operator", tokenValue);
   });
 });
 
-const tokenArray = [];
+const parenthesisButtons = document.querySelectorAll(
+  "[data-type='parenthesis']"
+);
+parenthesisButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    const tokenValue = event.target.textContent;
+    createToken("parenthesis", tokenValue);
+  });
+});
 
 function createToken(tokenType, tokenValue) {
   let token;
   switch (tokenType) {
     case "operator":
       token = operators[tokenValue];
+      token.type = "operator";
       break;
 
     default:
