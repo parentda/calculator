@@ -23,16 +23,21 @@ main {
   padding: 20px;
   border-radius: 20px;
   background-color: aquamarine;
+  height: 600px;
+  width: 400px;
 }
 
 #display {
   grid-row: 1 / 1;
   grid-column: 1 / 5;
   text-align: right;
+  width: 400px;
 }
 
 button {
   width: 75px;
   height: 75px;
   border-radius: 50%;
+  justify-self: center;
+  align-self: center;
 }

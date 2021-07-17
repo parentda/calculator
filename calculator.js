@@ -126,7 +126,13 @@ function createToken(tokenType, tokenValue) {
 
 function deleteToken() {}
 
-function parseTokenArray(array) {}
+function parseTokenArray(array) {
+  const outputQueue = [];
+  const operatorStack = [];
+  while (array.length) {
+    const currrentToken = array;
+  }
+}
 
 function evaluateParsedArray(array) {}
 
