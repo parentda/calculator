@@ -63,9 +63,44 @@ const operators = {
   },
 };
 
+const numberButtons = document.querySelectorAll("[data-type='number']");
+numberButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    const tokenType = event.target.getAttribute("data-type");
+    const tokenValue = +event.target.textContent;
+    createToken(tokenType, tokenValue);
+  });
+});
+
+const operatorButtons = document.querySelectorAll("[data-type='operator']");
+operatorButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    const tokenType = event.target.getAttribute("data-type");
+    const tokenValue = event.target.getAttribute("data-value");
+    createToken(tokenType, tokenValue);
+  });
+});
+
 const tokenArray = [];
 
-function createToken(type, value) {}
+function createToken(tokenType, tokenValue) {
+  let token;
+  switch (tokenType) {
+    case "operator":
+      token = operators[tokenValue];
+      break;
+
+    default:
+      token = {
+        type: tokenType,
+        value: tokenValue,
+      };
+      break;
+  }
+  tokenArray.push(token);
+}
+
+function deleteToken() {}
 
 function parseTokenArray(array) {}
 
