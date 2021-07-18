@@ -109,9 +109,7 @@ parenthesisButtons.forEach((button) => {
 
 evaluateButton.addEventListener("click", () => {
   const parsedArray = parseTokenArray(tokenArray);
-  console.log(parsedArray);
   const ANS = evaluateParsedArray(parsedArray);
-  console.log(ANS);
 });
 
 function createToken(tokenType, tokenValue) {
@@ -167,10 +165,10 @@ function shuntingYardAlgorithm(token, index, outQueue, opStack) {
   }
 }
 
-function parseTokenArray(arrayCopy) {
+function parseTokenArray(array) {
   const outputQueue = [];
   const operatorStack = [];
-  arrayCopy.forEach((token, index) => {
+  array.forEach((token, index) => {
     shuntingYardAlgorithm(token, index, outputQueue, operatorStack);
   });
   while (operatorStack.length) {
@@ -181,29 +179,29 @@ function parseTokenArray(arrayCopy) {
 
 function evaluateParsedArray(array) {
   let currentIndex = 0;
-  const arrayCopy = [...array];
-  while (arrayCopy.length > 1) {
-    let token = arrayCopy[currentIndex];
+
+  while (array.length > 1) {
+    let token = array[currentIndex];
     if (token.type === "operator") {
       if (token.notation === "infix") {
-        arrayCopy[currentIndex - 2].value = token.compute(
-          arrayCopy[currentIndex - 2].value,
-          arrayCopy[currentIndex - 1].value
+        array[currentIndex - 2].value = token.compute(
+          array[currentIndex - 2].value,
+          array[currentIndex - 1].value
         );
         currentIndex -= 2;
-        arrayCopy.splice(currentIndex + 1, 2);
+        array.splice(currentIndex + 1, 2);
       }
       if (token.notation === "prefix") {
-        arrayCopy[currentIndex - 1].value = token.compute(
-          arrayCopy[currentIndex - 1].value
+        array[currentIndex - 1].value = token.compute(
+          array[currentIndex - 1].value
         );
         currentIndex -= 1;
-        arrayCopy.splice(currentIndex + 1, 1);
+        array.splice(currentIndex + 1, 1);
       }
     }
     currentIndex += 1;
   }
-  return arrayCopy[0].value;
+  return array[array.length - 1].value;
 }
 
 function updateBottomDisplay(character) {
