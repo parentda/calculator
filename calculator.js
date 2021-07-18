@@ -80,7 +80,7 @@ numberButtons.forEach((button) => {
     ) {
       tokenArray[tokenArray.length - 1].value += buttonValue;
     } else {
-      createToken("number", buttonValue);
+      createToken("number", +buttonValue);
     }
     updateBottomDisplay(buttonValue);
   });
@@ -109,6 +109,9 @@ parenthesisButtons.forEach((button) => {
 
 evaluateButton.addEventListener("click", () => {
   const parsedArray = parseTokenArray(tokenArray);
+  console.log(parsedArray);
+  const ANS = evaluateParsedArray(parsedArray);
+  console.log(ANS);
 });
 
 function createToken(tokenType, tokenValue) {
@@ -164,24 +167,44 @@ function shuntingYardAlgorithm(token, index, outQueue, opStack) {
   }
 }
 
-function parseTokenArray(array) {
+function parseTokenArray(arrayCopy) {
   const outputQueue = [];
   const operatorStack = [];
-  array.forEach((token, index) => {
+  arrayCopy.forEach((token, index) => {
     shuntingYardAlgorithm(token, index, outputQueue, operatorStack);
   });
   while (operatorStack.length) {
     outputQueue.push(operatorStack.pop());
   }
-
-  console.log(outputQueue);
-  // console.log(`Output Queue: `);
-  // console.log(outputQueue);
-  // console.log(`Operator Stack: `);
-  // console.log(operatorStack);
+  return outputQueue;
 }
 
-function evaluateParsedArray(array) {}
+function evaluateParsedArray(array) {
+  let currentIndex = 0;
+  const arrayCopy = [...array];
+  while (arrayCopy.length > 1) {
+    let token = arrayCopy[currentIndex];
+    if (token.type === "operator") {
+      if (token.notation === "infix") {
+        arrayCopy[currentIndex - 2].value = token.compute(
+          arrayCopy[currentIndex - 2].value,
+          arrayCopy[currentIndex - 1].value
+        );
+        currentIndex -= 2;
+        arrayCopy.splice(currentIndex + 1, 2);
+      }
+      if (token.notation === "prefix") {
+        arrayCopy[currentIndex - 1].value = token.compute(
+          arrayCopy[currentIndex - 1].value
+        );
+        currentIndex -= 1;
+        arrayCopy.splice(currentIndex + 1, 1);
+      }
+    }
+    currentIndex += 1;
+  }
+  return arrayCopy[0].value;
+}
 
 function updateBottomDisplay(character) {
   Calculator.bottomDisplayText += `${character}`;
