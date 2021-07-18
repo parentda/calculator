@@ -69,6 +69,7 @@ const operatorButtons = document.querySelectorAll("[data-type='operator']");
 const parenthesisButtons = document.querySelectorAll(
   "[data-type='parenthesis']"
 );
+const evaluateButton = document.querySelector("[data-type='evaluate']");
 
 numberButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
@@ -106,6 +107,10 @@ parenthesisButtons.forEach((button) => {
   });
 });
 
+evaluateButton.addEventListener("click", () => {
+  const parsedArray = parseTokenArray(tokenArray);
+});
+
 function createToken(tokenType, tokenValue) {
   let token;
   switch (tokenType) {
@@ -126,12 +131,54 @@ function createToken(tokenType, tokenValue) {
 
 function deleteToken() {}
 
+function shuntingYardAlgorithm(token, index, outQueue, opStack) {
+  if (token.type === "number") {
+    outQueue.push(token);
+  } else if (token.type === "operator") {
+    let topOp = opStack[opStack.length - 1];
+    while (
+      topOp &&
+      topOp.value !== "(" &&
+      ((token.associativity === "left" &&
+        token.precedence <= topOp.precedence) ||
+        (token.associativity === "right" &&
+          token.precedence < topOp.precedence))
+    ) {
+      outQueue.push(opStack.pop());
+      topOp = opStack[opStack.length - 1];
+    }
+    opStack.push(token);
+  } else if (token.type === "parenthesis") {
+    if (token.value === "(") {
+      opStack.push(token);
+    } else if (token.value === ")") {
+      let topOp = opStack[opStack.length - 1];
+      while (topOp && topOp.value !== "(") {
+        outQueue.push(opStack.pop());
+        topOp = opStack[opStack.length - 1];
+      }
+      if (topOp.value === "(") {
+        opStack.pop(token);
+      }
+    }
+  }
+}
+
 function parseTokenArray(array) {
   const outputQueue = [];
   const operatorStack = [];
-  while (array.length) {
-    const currrentToken = array;
+  array.forEach((token, index) => {
+    shuntingYardAlgorithm(token, index, outputQueue, operatorStack);
+  });
+  while (operatorStack.length) {
+    outputQueue.push(operatorStack.pop());
   }
+
+  console.log(outputQueue);
+  // console.log(`Output Queue: `);
+  // console.log(outputQueue);
+  // console.log(`Operator Stack: `);
+  // console.log(operatorStack);
 }
 
 function evaluateParsedArray(array) {}
