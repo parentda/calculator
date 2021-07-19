@@ -1,4 +1,5 @@
 const Calculator = {
+  topDisplayText: "",
   bottomDisplayText: "",
   operators: {
     "-": {
@@ -59,7 +60,7 @@ const Calculator = {
   },
 };
 
-const tokenArray = [];
+let tokenArray = [];
 
 const displayTop = document.querySelector("#display-top");
 const displayBottom = document.querySelector("#display-bottom");
@@ -70,6 +71,7 @@ const parenthesisButtons = document.querySelectorAll(
   "[data-type='parenthesis']"
 );
 const evaluateButton = document.querySelector("[data-type='evaluate']");
+const resetButton = document.querySelector("[data-type='reset']");
 
 numberButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
@@ -110,7 +112,10 @@ parenthesisButtons.forEach((button) => {
 evaluateButton.addEventListener("click", () => {
   const parsedArray = parseTokenArray(tokenArray);
   const ANS = evaluateParsedArray(parsedArray);
+  console.log(ANS);
 });
+
+resetButton.addEventListener("click", reset);
 
 function createToken(tokenType, tokenValue) {
   let token;
@@ -206,5 +211,18 @@ function evaluateParsedArray(array) {
 
 function updateBottomDisplay(character) {
   Calculator.bottomDisplayText += `${character}`;
+  displayBottom.textContent = Calculator.bottomDisplayText;
+}
+
+function updateTopDisplay(character) {
+  Calculator.topDisplayText += `${character}`;
+  displayTop.textContent = Calculator.topDisplayText;
+}
+
+function reset() {
+  tokenArray = [];
+  Calculator.topDisplayText = "";
+  Calculator.bottomDisplayText = "";
+  displayTop.textContent = Calculator.topDisplayText;
   displayBottom.textContent = Calculator.bottomDisplayText;
 }
