@@ -3,6 +3,7 @@ const Calculator = {
   bottomDisplayText: "",
   tokenArray: [],
   ANS: undefined,
+  openParentheses: 0,
   operators: {
     "-": {
       value: "-",
@@ -66,6 +67,7 @@ const displayTop = document.querySelector("#display-top");
 const displayBottom = document.querySelector("#display-bottom");
 
 const numberButtons = document.querySelectorAll("[data-type='number']");
+const decimalButton = document.querySelector("[data-type='decimal']");
 const operatorButtons = document.querySelectorAll("[data-type='operator']");
 const parenthesisButtons = document.querySelectorAll(
   "[data-type='parenthesis']"
@@ -77,12 +79,9 @@ const answerButton = document.querySelector("[data-type='answer']");
 numberButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
     const buttonValue = event.target.textContent;
-    if (
-      Calculator.tokenArray.length &&
-      Calculator.tokenArray[Calculator.tokenArray.length - 1].type === "number"
-    ) {
-      Calculator.tokenArray[Calculator.tokenArray.length - 1].value +=
-        buttonValue;
+    const lastToken = Calculator.tokenArray[Calculator.tokenArray.length - 1];
+    if (Calculator.tokenArray.length && lastToken.type === "number") {
+      lastToken.value += buttonValue;
     } else {
       createToken("number", buttonValue);
     }
@@ -121,6 +120,28 @@ evaluateButton.addEventListener("click", () => {
 });
 
 resetButton.addEventListener("click", reset);
+
+decimalButton.addEventListener("click", (event) => {
+  const buttonValue = event.target.textContent;
+  const lastToken = Calculator.tokenArray[Calculator.tokenArray.length - 1];
+  if (
+    Calculator.tokenArray.length &&
+    lastToken.type === "number" &&
+    !lastToken.value.includes(".")
+  ) {
+    lastToken.value += buttonValue;
+    updateBottomDisplay(buttonValue);
+  } else if (
+    Calculator.tokenArray.length &&
+    lastToken.type === "number" &&
+    lastToken.value.includes(".")
+  ) {
+    // do nothing
+  } else {
+    createToken("number", buttonValue);
+    updateBottomDisplay(buttonValue);
+  }
+});
 
 answerButton.addEventListener("click", () => {
   if (Calculator.ANS) {
