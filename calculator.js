@@ -1,6 +1,8 @@
 const Calculator = {
   topDisplayText: "",
   bottomDisplayText: "",
+  tokenArray: [],
+  ANS: undefined,
   operators: {
     "-": {
       value: "-",
@@ -60,8 +62,6 @@ const Calculator = {
   },
 };
 
-let tokenArray = [];
-
 const displayTop = document.querySelector("#display-top");
 const displayBottom = document.querySelector("#display-bottom");
 
@@ -72,17 +72,19 @@ const parenthesisButtons = document.querySelectorAll(
 );
 const evaluateButton = document.querySelector("[data-type='evaluate']");
 const resetButton = document.querySelector("[data-type='reset']");
+const answerButton = document.querySelector("[data-type='answer']");
 
 numberButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
     const buttonValue = event.target.textContent;
     if (
-      tokenArray.length &&
-      tokenArray[tokenArray.length - 1].type === "number"
+      Calculator.tokenArray.length &&
+      Calculator.tokenArray[Calculator.tokenArray.length - 1].type === "number"
     ) {
-      tokenArray[tokenArray.length - 1].value += buttonValue;
+      Calculator.tokenArray[Calculator.tokenArray.length - 1].value +=
+        buttonValue;
     } else {
-      createToken("number", +buttonValue);
+      createToken("number", buttonValue);
     }
     updateBottomDisplay(buttonValue);
   });
@@ -110,12 +112,22 @@ parenthesisButtons.forEach((button) => {
 });
 
 evaluateButton.addEventListener("click", () => {
-  const parsedArray = parseTokenArray(tokenArray);
-  const ANS = evaluateParsedArray(parsedArray);
-  console.log(ANS);
+  const parsedArray = parseTokenArray(Calculator.tokenArray);
+  Calculator.ANS = evaluateParsedArray(parsedArray);
+  updateTopDisplay(Calculator.ANS);
+  Calculator.tokenArray = [];
+  Calculator.bottomDisplayText = "";
+  displayBottom.textContent = Calculator.bottomDisplayText;
 });
 
 resetButton.addEventListener("click", reset);
+
+answerButton.addEventListener("click", () => {
+  if (Calculator.ANS) {
+    createToken("number", Calculator.ANS);
+    updateBottomDisplay("ANS");
+  }
+});
 
 function createToken(tokenType, tokenValue) {
   let token;
@@ -132,7 +144,7 @@ function createToken(tokenType, tokenValue) {
       };
       break;
   }
-  tokenArray.push(token);
+  Calculator.tokenArray.push(token);
 }
 
 function deleteToken() {}
@@ -190,15 +202,15 @@ function evaluateParsedArray(array) {
     if (token.type === "operator") {
       if (token.notation === "infix") {
         array[currentIndex - 2].value = token.compute(
-          array[currentIndex - 2].value,
-          array[currentIndex - 1].value
+          +array[currentIndex - 2].value,
+          +array[currentIndex - 1].value
         );
         currentIndex -= 2;
         array.splice(currentIndex + 1, 2);
       }
       if (token.notation === "prefix") {
         array[currentIndex - 1].value = token.compute(
-          array[currentIndex - 1].value
+          +array[currentIndex - 1].value
         );
         currentIndex -= 1;
         array.splice(currentIndex + 1, 1);
@@ -220,9 +232,10 @@ function updateTopDisplay(character) {
 }
 
 function reset() {
-  tokenArray = [];
+  Calculator.tokenArray = [];
   Calculator.topDisplayText = "";
   Calculator.bottomDisplayText = "";
+  Calculator.ANS = undefined;
   displayTop.textContent = Calculator.topDisplayText;
   displayBottom.textContent = Calculator.bottomDisplayText;
 }
