@@ -38,7 +38,7 @@ const Calculator = {
     },
 
     "u-": {
-      value: "u-",
+      value: "-",
       notation: "prefix",
       precedence: 30,
       associativity: "left",
@@ -105,12 +105,28 @@ operatorButtons.forEach((button) => {
 parenthesisButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
     const buttonValue = event.target.textContent;
-    createToken("parenthesis", buttonValue);
-    updateBottomDisplay(buttonValue);
+    const lastToken = Calculator.tokenArray[Calculator.tokenArray.length - 1];
+    if (buttonValue === "(") {
+      Calculator.openParentheses += 1;
+      createToken("parenthesis", buttonValue);
+      updateBottomDisplay(buttonValue);
+    } else if (
+      buttonValue === ")" &&
+      Calculator.openParentheses > 0 &&
+      lastToken.value !== "("
+    ) {
+      Calculator.openParentheses -= 1;
+      createToken("parenthesis", buttonValue);
+      updateBottomDisplay(buttonValue);
+    }
   });
 });
 
 evaluateButton.addEventListener("click", () => {
+  while (Calculator.openParentheses > 0) {
+    createToken("parenthesis", ")");
+    Calculator.openParentheses -= 1;
+  }
   const parsedArray = parseTokenArray(Calculator.tokenArray);
   Calculator.ANS = evaluateParsedArray(parsedArray);
   updateTopDisplay(Calculator.ANS);
