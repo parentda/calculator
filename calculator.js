@@ -82,8 +82,11 @@ numberButtons.forEach((button) => {
     const lastToken = Calculator.tokenArray[Calculator.tokenArray.length - 1];
     if (Calculator.tokenArray.length && lastToken.type === "number") {
       lastToken.value += buttonValue;
+    } else if (Calculator.tokenArray.length && lastToken.value === ")") {
+      createToken("operator", "*", 0);
+      createToken("number", buttonValue, 0);
     } else {
-      createToken("number", buttonValue);
+      createToken("number", buttonValue, 0);
     }
     updateBottomDisplay(buttonValue);
   });
@@ -97,7 +100,7 @@ operatorButtons.forEach((button) => {
     } else {
       buttonValue = event.target.getAttribute("data-value");
     }
-    createToken("operator", buttonValue);
+    createToken("operator", buttonValue, 0);
     updateBottomDisplay(buttonValue);
   });
 });
@@ -107,8 +110,14 @@ parenthesisButtons.forEach((button) => {
     const buttonValue = event.target.textContent;
     const lastToken = Calculator.tokenArray[Calculator.tokenArray.length - 1];
     if (buttonValue === "(") {
+      if (
+        Calculator.tokenArray.length &&
+        (lastToken.type === "number" || lastToken.value === ")")
+      ) {
+        createToken("operator", "*", 0);
+      }
       Calculator.openParentheses += 1;
-      createToken("parenthesis", buttonValue);
+      createToken("parenthesis", buttonValue, 0);
       updateBottomDisplay(buttonValue);
     } else if (
       buttonValue === ")" &&
@@ -116,15 +125,18 @@ parenthesisButtons.forEach((button) => {
       lastToken.value !== "("
     ) {
       Calculator.openParentheses -= 1;
-      createToken("parenthesis", buttonValue);
+      createToken("parenthesis", buttonValue, 0);
       updateBottomDisplay(buttonValue);
     }
   });
 });
 
 evaluateButton.addEventListener("click", () => {
+  if (!Calculator.tokenArray.length) {
+    return;
+  }
   while (Calculator.openParentheses > 0) {
-    createToken("parenthesis", ")");
+    createToken("parenthesis", ")", 0);
     Calculator.openParentheses -= 1;
   }
   const parsedArray = parseTokenArray(Calculator.tokenArray);
@@ -154,19 +166,19 @@ decimalButton.addEventListener("click", (event) => {
   ) {
     // do nothing
   } else {
-    createToken("number", buttonValue);
+    createToken("number", buttonValue, 0);
     updateBottomDisplay(buttonValue);
   }
 });
 
 answerButton.addEventListener("click", () => {
   if (Calculator.ANS) {
-    createToken("number", Calculator.ANS);
+    createToken("number", Calculator.ANS, 0);
     updateBottomDisplay("ANS");
   }
 });
 
-function createToken(tokenType, tokenValue) {
+function createToken(tokenType, tokenValue, positionFromEnd) {
   let token;
   switch (tokenType) {
     case "operator":
@@ -181,7 +193,11 @@ function createToken(tokenType, tokenValue) {
       };
       break;
   }
-  Calculator.tokenArray.push(token);
+  Calculator.tokenArray.splice(
+    Calculator.tokenArray.length - positionFromEnd,
+    0,
+    token
+  );
 }
 
 function deleteToken() {}
