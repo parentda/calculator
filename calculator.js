@@ -191,10 +191,13 @@ evaluateButton.addEventListener("click", () => {
   }
   const parsedArray = parseTokenArray(Calculator.tokenArray);
   Calculator.ANS = evaluateParsedArray(parsedArray);
-  updateTopDisplay(Calculator.ANS);
+
   Calculator.tokenArray = [];
-  Calculator.bottomDisplayText = "";
-  displayBottom.textContent = Calculator.bottomDisplayText;
+  Calculator.display.stringArray = [];
+  Calculator.display.topDisplayText = Calculator.ANS;
+  displayTop.textContent = Calculator.display.topDisplayText;
+  Calculator.display.bottomDisplayText = "";
+  displayBottom.textContent = Calculator.display.bottomDisplayText;
 });
 
 resetButton.addEventListener("click", reset);
@@ -261,14 +264,15 @@ function createToken(tokenType, tokenValue, positionFromEnd, visibility) {
     token
   );
 
-  updateStringArray(token);
+  addStringArray(token, positionFromEnd);
 }
 
 function deleteToken(positionFromEnd) {
-  Calculator.tokenArray.splice(
+  const deletedToken = Calculator.tokenArray.splice(
     Calculator.tokenArray.length - 1 - positionFromEnd,
     1
   );
+  subtractStringArray(deletedToken[0]);
 }
 
 function shuntingYardAlgorithm(token, outQueue, opStack) {
@@ -347,39 +351,48 @@ function implicitMultiply() {
   createToken("operator", "*", 0, false);
 }
 
-function updateBottomDisplay(character) {
-  Calculator.bottomDisplayText += `${character}`;
-  displayBottom.textContent = Calculator.bottomDisplayText;
-}
-
-function updateTopDisplay(character) {
-  Calculator.topDisplayText += `${character}`;
-  displayTop.textContent = Calculator.topDisplayText;
-}
-
 function reset() {
+  Calculator.currentID = 0;
   Calculator.tokenArray = [];
-  Calculator.topDisplayText = "";
-  Calculator.bottomDisplayText = "";
+  Calculator.display.topDisplayText = "";
+  Calculator.display.bottomDisplayText = "";
+  Calculator.display.stringArray = [];
+  Calculator.display.currentIndex = 0;
   Calculator.ANS = undefined;
-  displayTop.textContent = Calculator.topDisplayText;
-  displayBottom.textContent = Calculator.bottomDisplayText;
+  displayTop.textContent = Calculator.display.topDisplayText;
+  displayBottom.textContent = Calculator.display.bottomDisplayText;
 }
 
-function updateStringArray(token) {
+function addStringArray(token, positionFromEnd) {
   if (token.visibility) {
     const stringArrayToken = {};
     stringArrayToken.id = token.id;
     stringArrayToken.value = token.value;
 
     Calculator.display.stringArray.splice(
-      Calculator.display.currentIndex,
+      Calculator.display.currentIndex - positionFromEnd,
       0,
       stringArrayToken
     );
     Calculator.display.currentIndex += 1;
     displayStringArray();
   }
+}
+
+function subtractStringArray(token) {
+  while (
+    Calculator.display.stringArray.findIndex(
+      (element) => element.id === token.id
+    ) >= 0
+  ) {
+    const stringTokenIndex = Calculator.display.stringArray.findIndex(
+      (element) => element.id === token.id
+    );
+    Calculator.display.stringArray.splice(stringTokenIndex, 1);
+    Calculator.display.currentIndex = stringTokenIndex;
+  }
+  Calculator.display.currentIndex += 1;
+  displayStringArray();
 }
 
 function displayStringArray() {
