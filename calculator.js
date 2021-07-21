@@ -2,7 +2,7 @@ const Calculator = {
   currentID: 0,
   tokenArray: [],
   display: {
-    currentIndex: 0,
+    currentIndex: -1,
     stringArray: [],
     stringExpression: "",
     topDisplayText: "",
@@ -52,7 +52,7 @@ const Calculator = {
     },
 
     "^": {
-      value: "^",
+      value: ["<sup>", "</sup>"],
       notation: "infix",
       precedence: 40,
       associativity: "right",
@@ -60,7 +60,7 @@ const Calculator = {
     },
 
     root: {
-      value: "root",
+      value: ["<sup>", "</sup>", "&#x0221A;"],
       notation: "infix",
       precedence: 40,
       associativity: "right",
@@ -101,7 +101,7 @@ numberButtons.forEach((button) => {
         // do nothing
       } else {
         lastToken.value += buttonValue;
-        stringToken.value = lastToken.value;
+        stringToken.value += buttonValue;
         displayStringArray();
       }
     } else if (Calculator.tokenArray.length && lastToken.value === ")") {
@@ -173,7 +173,8 @@ parenthesisButtons.forEach((button) => {
     } else if (
       buttonValue === ")" &&
       Calculator.openParentheses > 0 &&
-      lastToken.value !== "("
+      lastToken.value !== "(" &&
+      lastToken.type !== "operator"
     ) {
       Calculator.openParentheses -= 1;
       createToken("parenthesis", buttonValue, 0, true);
@@ -192,11 +193,16 @@ evaluateButton.addEventListener("click", () => {
   const parsedArray = parseTokenArray(Calculator.tokenArray);
   Calculator.ANS = evaluateParsedArray(parsedArray);
 
+  Calculator.currentID = 0;
   Calculator.tokenArray = [];
-  Calculator.display.stringArray = [];
   Calculator.display.topDisplayText = Calculator.ANS;
-  displayTop.textContent = Calculator.display.topDisplayText;
   Calculator.display.bottomDisplayText = "";
+  Calculator.display.stringArray = [];
+  Calculator.display.stringExpression = "";
+  Calculator.display.currentIndex = -1;
+  Calculator.ANS = undefined;
+  Calculator.openParentheses = 0;
+  displayTop.textContent = Calculator.display.topDisplayText;
   displayBottom.textContent = Calculator.display.bottomDisplayText;
 });
 
@@ -357,20 +363,46 @@ function reset() {
   Calculator.display.topDisplayText = "";
   Calculator.display.bottomDisplayText = "";
   Calculator.display.stringArray = [];
-  Calculator.display.currentIndex = 0;
+  Calculator.display.stringExpression = "";
+  Calculator.display.currentIndex = -1;
   Calculator.ANS = undefined;
+  Calculator.openParentheses = 0;
   displayTop.textContent = Calculator.display.topDisplayText;
   displayBottom.textContent = Calculator.display.bottomDisplayText;
 }
 
 function addStringArray(token, positionFromEnd) {
   if (token.visibility) {
+    let bufferChar = "";
+    if (
+      (Calculator.display.stringArray.length &&
+        token.type === "number" &&
+        Calculator.display.stringArray[Calculator.display.currentIndex]
+          .precedence < 30) ||
+      (token.precedence === 30 &&
+        Calculator.display.stringArray[Calculator.display.currentIndex]
+          .precedence < 30) ||
+      (token.type === "operator" &&
+        token.precedence < 30 &&
+        Calculator.display.stringArray[Calculator.display.currentIndex].type ===
+          "number") ||
+      (token.value === "(" &&
+        Calculator.display.stringArray[Calculator.display.currentIndex]
+          .precedence < 30) ||
+      
+    ) {
+      bufferChar = " ";
+    }
+
     const stringArrayToken = {};
+    stringArrayToken.type = token.type;
     stringArrayToken.id = token.id;
-    stringArrayToken.value = token.value;
+    stringArrayToken.value = bufferChar + token.value;
+    stringArrayToken.notation = token.notation;
+    stringArrayToken.precedence = token.precedence;
 
     Calculator.display.stringArray.splice(
-      Calculator.display.currentIndex - positionFromEnd,
+      Calculator.display.currentIndex + 1 - positionFromEnd,
       0,
       stringArrayToken
     );
@@ -391,7 +423,6 @@ function subtractStringArray(token) {
     Calculator.display.stringArray.splice(stringTokenIndex, 1);
     Calculator.display.currentIndex = stringTokenIndex;
   }
-  Calculator.display.currentIndex += 1;
   displayStringArray();
 }
 
@@ -399,5 +430,5 @@ function displayStringArray() {
   Calculator.display.stringExpression = Calculator.display.stringArray
     .map((element) => element.value)
     .join("");
-  displayBottom.textContent = Calculator.display.stringExpression;
+  displayBottom.innerHTML = Calculator.display.stringExpression;
 }
