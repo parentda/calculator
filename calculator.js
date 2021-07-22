@@ -172,20 +172,56 @@ parenthesisButtons.forEach((button) => {
 
     if (buttonValue === "(") {
       if (
+        Calculator.powerLevels.currentPowerLevel > 0 &&
+        !Calculator.powerLevels.openParentheses[
+          Calculator.powerLevels.currentPowerLevel
+        ] &&
+        Calculator.tokenArray[Calculator.currentIndex].value !== "("
+      ) {
+        Calculator.powerLevels.currentPowerLevel = 0;
+        Calculator.currentIndex = Calculator.tokenArray.length - 1;
+      } else if (
         lastToken &&
         (lastToken.type === "number" || lastToken.value === ")")
       ) {
         implicitMultiply();
       }
-      Calculator.openParentheses += 1;
+
+      if (
+        !Calculator.powerLevels.openParentheses[
+          Calculator.powerLevels.currentPowerLevel
+        ]
+      ) {
+        Calculator.powerLevels.openParentheses[
+          Calculator.powerLevels.currentPowerLevel
+        ] = 0;
+      }
+      Calculator.powerLevels.openParentheses[
+        Calculator.powerLevels.currentPowerLevel
+      ] += 1;
+      // Calculator.openParentheses += 1;
       createToken("parenthesis", buttonValue, 0, true);
     } else if (
       buttonValue === ")" &&
-      Calculator.openParentheses > 0 &&
+      Calculator.powerLevels.openParentheses[
+        Calculator.powerLevels.currentPowerLevel
+      ] > 0 &&
       lastToken.value !== "(" &&
       lastToken.type !== "operator"
     ) {
-      Calculator.openParentheses -= 1;
+      if (
+        !Calculator.powerLevels.openParentheses[
+          Calculator.powerLevels.currentPowerLevel
+        ]
+      ) {
+        Calculator.powerLevels.openParentheses[
+          Calculator.powerLevels.currentPowerLevel
+        ] = 0;
+      }
+      Calculator.powerLevels.openParentheses[
+        Calculator.powerLevels.currentPowerLevel
+      ] -= 1;
+      // Calculator.openParentheses -= 1;
       createToken("parenthesis", buttonValue, 0, true);
     }
   });
@@ -195,9 +231,12 @@ evaluateButton.addEventListener("click", () => {
   if (!Calculator.tokenArray.length) {
     return;
   }
-  while (Calculator.openParentheses > 0) {
+  const openParentheses = Calculator.powerLevels.openParentheses.reduce(
+    (a, b) => a + b,
+    0
+  );
+  for (let i = 0; i < openParentheses; i += 1) {
     createToken("parenthesis", ")", 0, true);
-    Calculator.openParentheses -= 1;
   }
   const parsedArray = parseTokenArray(Calculator.tokenArray);
   Calculator.ANS = evaluateParsedArray(parsedArray);
