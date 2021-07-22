@@ -1,14 +1,19 @@
 const Calculator = {
   currentID: 0,
+  currentIndex: 0,
   tokenArray: [],
   display: {
-    currentIndex: -1,
+    currentIndex: 0,
     stringArray: [],
     stringExpression: "",
     topDisplayText: "",
     bottomDisplayText: "",
   },
   ANS: undefined,
+  powerLevels: {
+    currentPowerLevel: 0,
+    openParentheses: [],
+  },
   openParentheses: 0,
   operators: {
     "-": {
@@ -52,7 +57,7 @@ const Calculator = {
     },
 
     "^": {
-      value: ["<sup>", "&#9633;", "</sup>"],
+      value: "&#9633;",
       notation: "infix",
       precedence: 40,
       associativity: "right",
@@ -60,7 +65,7 @@ const Calculator = {
     },
 
     root: {
-      value: ["<sup>", "&#9633;", "</sup>", "&#x0221A;"],
+      value: ["&#9633;", "&#x0221A;"],
       notation: "infix",
       precedence: 40,
       associativity: "right",
@@ -89,21 +94,13 @@ numberButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
     const buttonValue = event.target.textContent;
     const lastToken = Calculator.tokenArray[Calculator.tokenArray.length - 1];
-    const stringToken =
-      Calculator.display.stringArray[
-        Calculator.display.stringArray.findIndex(
-          (element) => element.id === lastToken.id
-        )
-      ];
 
     if (lastToken && lastToken.type === "number") {
       if (buttonValue === "0" && lastToken.value === "0") {
         // do nothing
       } else {
         lastToken.value += buttonValue;
-        // stringToken.value += buttonValue;
         stringifyTokenArray();
-        // displayStringArray();
       }
     } else if (Calculator.tokenArray.length && lastToken.value === ")") {
       implicitMultiply();
@@ -125,8 +122,19 @@ operatorButtons.forEach((button) => {
       buttonValue = event.target.getAttribute("data-value");
     }
 
-    if (lastToken && (lastToken.type === "number" || lastToken.value === ")")) {
-      createToken("operator", buttonValue, 0, true);
+    if (
+      lastToken &&
+      (lastToken.type === "number" ||
+        (lastToken.value === ")" && lastToken.visibility))
+    ) {
+      if (buttonValue === "^" || buttonValue === "root") {
+        Calculator.powerLevels.currentPowerLevel += 1;
+        createToken("operator", buttonValue, 0, true);
+        createToken("parenthesis", "(", 0, false);
+        createToken("parenthesis", ")", 0, false);
+      } else {
+        createToken("operator", buttonValue, 0, true);
+      }
     }
   });
 });
@@ -225,7 +233,7 @@ decimalButton.addEventListener("click", (event) => {
     !lastToken.value.includes(".")
   ) {
     lastToken.value += buttonValue;
-    stringToken.value += buttonValue;
+    // stringToken.value += buttonValue;
     stringifyTokenArray();
     // displayStringArray();
   } else if (
@@ -253,6 +261,7 @@ function createToken(tokenType, tokenValue, positionFromEnd, visibility) {
       token.type = "operator";
       token.id = Calculator.currentID;
       token.visibility = visibility;
+      token.powerLevel = Calculator.powerLevels.currentPowerLevel;
       break;
 
     default:
@@ -261,6 +270,7 @@ function createToken(tokenType, tokenValue, positionFromEnd, visibility) {
         value: tokenValue,
         id: Calculator.currentID,
         visibility: visibility,
+        powerLevel: Calculator.powerLevels.currentPowerLevel,
       };
       break;
   }
@@ -271,11 +281,7 @@ function createToken(tokenType, tokenValue, positionFromEnd, visibility) {
     0,
     token
   );
-  const t0 = performance.now();
-  stringifyTokenArray();
-  // addStringArray(token, positionFromEnd);
-  const t1 = performance.now();
-  console.log(`Call to doSomething took ${t1 - t0} milliseconds.`);
+
   stringifyTokenArray();
 }
 
@@ -460,17 +466,17 @@ function subtractStringArray(token) {
 }
 
 function displayStringArray() {
-  Calculator.display.stringExpression = Calculator.display.stringArray
-    .map((element) => element.value)
-    .join("");
+  Calculator.display.stringExpression = Calculator.display.stringArray.join("");
   displayBottom.innerHTML = Calculator.display.stringExpression;
 }
 
 function stringifyTokenArray() {
-  let stringExpression = "";
+  let stringExpressionArray = [];
   Calculator.tokenArray.forEach((token) => {
-    stringExpression += token.value;
+    // if (token.visibility) {
+    stringExpressionArray.push(token.value);
+    // }
   });
-  Calculator.display.stringExpression = stringExpression;
-  displayBottom.innerHTML = Calculator.display.stringExpression;
+  Calculator.display.stringArray = stringExpressionArray;
+  displayStringArray();
 }
