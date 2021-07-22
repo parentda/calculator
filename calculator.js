@@ -101,8 +101,9 @@ numberButtons.forEach((button) => {
         // do nothing
       } else {
         lastToken.value += buttonValue;
-        stringToken.value += buttonValue;
-        displayStringArray();
+        // stringToken.value += buttonValue;
+        stringifyTokenArray();
+        // displayStringArray();
       }
     } else if (Calculator.tokenArray.length && lastToken.value === ")") {
       implicitMultiply();
@@ -225,7 +226,8 @@ decimalButton.addEventListener("click", (event) => {
   ) {
     lastToken.value += buttonValue;
     stringToken.value += buttonValue;
-    displayStringArray();
+    stringifyTokenArray();
+    // displayStringArray();
   } else if (
     lastToken &&
     lastToken.type === "number" &&
@@ -269,8 +271,12 @@ function createToken(tokenType, tokenValue, positionFromEnd, visibility) {
     0,
     token
   );
-
-  addStringArray(token, positionFromEnd);
+  const t0 = performance.now();
+  stringifyTokenArray();
+  // addStringArray(token, positionFromEnd);
+  const t1 = performance.now();
+  console.log(`Call to doSomething took ${t1 - t0} milliseconds.`);
+  stringifyTokenArray();
 }
 
 function deleteToken(positionFromEnd) {
@@ -278,7 +284,8 @@ function deleteToken(positionFromEnd) {
     Calculator.tokenArray.length - 1 - positionFromEnd,
     1
   );
-  subtractStringArray(deletedToken[0]);
+  stringifyTokenArray();
+  // subtractStringArray(deletedToken[0]);
 }
 
 function shuntingYardAlgorithm(token, outQueue, opStack) {
@@ -456,5 +463,14 @@ function displayStringArray() {
   Calculator.display.stringExpression = Calculator.display.stringArray
     .map((element) => element.value)
     .join("");
+  displayBottom.innerHTML = Calculator.display.stringExpression;
+}
+
+function stringifyTokenArray() {
+  let stringExpression = "";
+  Calculator.tokenArray.forEach((token) => {
+    stringExpression += token.value;
+  });
+  Calculator.display.stringExpression = stringExpression;
   displayBottom.innerHTML = Calculator.display.stringExpression;
 }
