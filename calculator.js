@@ -411,6 +411,7 @@ function addStringArray(token, positionFromEnd) {
 
     // properly format exponents
     if (token.value.length === 3) {
+      //this is a test
     }
 
     // properly format roots
