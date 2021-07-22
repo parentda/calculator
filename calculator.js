@@ -52,7 +52,7 @@ const Calculator = {
     },
 
     "^": {
-      value: ["<sup>", "</sup>"],
+      value: ["<sup>", "&#9633;", "</sup>"],
       notation: "infix",
       precedence: 40,
       associativity: "right",
@@ -60,7 +60,7 @@ const Calculator = {
     },
 
     root: {
-      value: ["<sup>", "</sup>", "&#x0221A;"],
+      value: ["<sup>", "&#9633;", "</sup>", "&#x0221A;"],
       notation: "infix",
       precedence: 40,
       associativity: "right",
@@ -224,7 +224,7 @@ decimalButton.addEventListener("click", (event) => {
     !lastToken.value.includes(".")
   ) {
     lastToken.value += buttonValue;
-    stringToken.value = lastToken.value;
+    stringToken.value += buttonValue;
     displayStringArray();
   } else if (
     lastToken &&
@@ -373,28 +373,53 @@ function reset() {
 
 function addStringArray(token, positionFromEnd) {
   if (token.visibility) {
+    // properly space numbers, operators, and brackets in the expression string representation
     let bufferChar = "";
     if (
-      (Calculator.display.stringArray.length &&
-        token.type === "number" &&
+      Calculator.display.stringArray.length &&
+      ((token.type === "number" &&
         Calculator.display.stringArray[Calculator.display.currentIndex]
           .precedence < 30) ||
-      (token.precedence === 30 &&
-        Calculator.display.stringArray[Calculator.display.currentIndex]
-          .precedence < 30) ||
-      (token.type === "operator" &&
-        token.precedence < 30 &&
-        Calculator.display.stringArray[Calculator.display.currentIndex].type ===
-          "number") ||
-      (token.value === "(" &&
-        Calculator.display.stringArray[Calculator.display.currentIndex]
-          .precedence < 30) ||
-      
+        (token.precedence === 30 &&
+          Calculator.display.stringArray[Calculator.display.currentIndex]
+            .precedence < 30) ||
+        (token.type === "operator" &&
+          token.precedence < 30 &&
+          Calculator.display.stringArray[Calculator.display.currentIndex]
+            .type === "number") ||
+        (token.value === "(" &&
+          Calculator.display.stringArray[Calculator.display.currentIndex]
+            .precedence < 30) ||
+        (token.type === "operator" &&
+          token.precedence < 30 &&
+          Calculator.display.stringArray[Calculator.display.currentIndex]
+            .value === ")"))
     ) {
+      bufferChar = " ";
+    } else if (
+      Calculator.display.stringArray.length &&
+      token.precedence === 30 &&
+      Calculator.display.stringArray[Calculator.display.currentIndex].type ===
+        "number"
+    ) {
+      Calculator.display.stringArray[Calculator.display.currentIndex].value =
+        Calculator.display.stringArray[
+          Calculator.display.currentIndex
+        ].value.trim();
       bufferChar = " ";
     }
 
+    // properly format exponents
+    if (token.value.length === 3) {
+    }
+
+    // properly format roots
+    else if (token.value.length === 4) {
+    }
+
+    const tempArray = [];
     const stringArrayToken = {};
+    tempArray[0] = stringArrayToken;
     stringArrayToken.type = token.type;
     stringArrayToken.id = token.id;
     stringArrayToken.value = bufferChar + token.value;
@@ -404,7 +429,7 @@ function addStringArray(token, positionFromEnd) {
     Calculator.display.stringArray.splice(
       Calculator.display.currentIndex + 1 - positionFromEnd,
       0,
-      stringArrayToken
+      ...tempArray
     );
     Calculator.display.currentIndex += 1;
     displayStringArray();
