@@ -1,6 +1,6 @@
 const Calculator = {
   currentID: 0,
-  currentIndex: 0,
+  currentIndex: -1,
   tokenArray: [],
   display: {
     currentIndex: 0,
@@ -93,7 +93,7 @@ const answerButton = document.querySelector("[data-type='answer']");
 numberButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
     const buttonValue = event.target.textContent;
-    const lastToken = Calculator.tokenArray[Calculator.tokenArray.length - 1];
+    const lastToken = Calculator.tokenArray[Calculator.currentIndex];
 
     if (lastToken && lastToken.type === "number") {
       if (buttonValue === "0" && lastToken.value === "0") {
@@ -114,7 +114,7 @@ numberButtons.forEach((button) => {
 operatorButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
     let buttonValue;
-    const lastToken = Calculator.tokenArray[Calculator.tokenArray.length - 1];
+    const lastToken = Calculator.tokenArray[Calculator.currentIndex];
 
     if (event.target.localName === "sup") {
       buttonValue = event.target.parentElement.getAttribute("data-value");
@@ -128,10 +128,11 @@ operatorButtons.forEach((button) => {
         (lastToken.value === ")" && lastToken.visibility))
     ) {
       if (buttonValue === "^" || buttonValue === "root") {
-        Calculator.powerLevels.currentPowerLevel += 1;
         createToken("operator", buttonValue, 0, true);
+        Calculator.powerLevels.currentPowerLevel += 1;
         createToken("parenthesis", "(", 0, false);
         createToken("parenthesis", ")", 0, false);
+        Calculator.currentIndex -= 1;
       } else {
         createToken("operator", buttonValue, 0, true);
       }
@@ -141,9 +142,8 @@ operatorButtons.forEach((button) => {
 
 unaryOperatorButton.addEventListener("click", (event) => {
   const buttonValue = event.target.getAttribute("data-value");
-  const lastToken = Calculator.tokenArray[Calculator.tokenArray.length - 1];
-  const secondLastToken =
-    Calculator.tokenArray[Calculator.tokenArray.length - 2];
+  const lastToken = Calculator.tokenArray[Calculator.currentIndex];
+  const secondLastToken = Calculator.tokenArray[Calculator.currentIndex - 1];
 
   if (
     !lastToken ||
@@ -168,7 +168,7 @@ unaryOperatorButton.addEventListener("click", (event) => {
 parenthesisButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
     const buttonValue = event.target.textContent;
-    const lastToken = Calculator.tokenArray[Calculator.tokenArray.length - 1];
+    const lastToken = Calculator.tokenArray[Calculator.currentIndex];
 
     if (buttonValue === "(") {
       if (
@@ -203,13 +203,16 @@ evaluateButton.addEventListener("click", () => {
   Calculator.ANS = evaluateParsedArray(parsedArray);
 
   Calculator.currentID = 0;
+  Calculator.currentIndex = -1;
   Calculator.tokenArray = [];
   Calculator.display.topDisplayText = Calculator.ANS;
   Calculator.display.bottomDisplayText = "";
   Calculator.display.stringArray = [];
   Calculator.display.stringExpression = "";
-  Calculator.display.currentIndex = -1;
+  Calculator.display.currentIndex = 0;
   Calculator.ANS = undefined;
+  Calculator.powerLevels.currentPowerLevel = 0;
+  Calculator.powerLevels.openParentheses = [];
   Calculator.openParentheses = 0;
   displayTop.textContent = Calculator.display.topDisplayText;
   displayBottom.textContent = Calculator.display.bottomDisplayText;
@@ -219,13 +222,7 @@ resetButton.addEventListener("click", reset);
 
 decimalButton.addEventListener("click", (event) => {
   const buttonValue = event.target.textContent;
-  const lastToken = Calculator.tokenArray[Calculator.tokenArray.length - 1];
-  const stringToken =
-    Calculator.display.stringArray[
-      Calculator.display.stringArray.findIndex(
-        (element) => element.id === lastToken.id
-      )
-    ];
+  const lastToken = Calculator.tokenArray[Calculator.currentIndex];
 
   if (
     lastToken &&
@@ -233,9 +230,7 @@ decimalButton.addEventListener("click", (event) => {
     !lastToken.value.includes(".")
   ) {
     lastToken.value += buttonValue;
-    // stringToken.value += buttonValue;
     stringifyTokenArray();
-    // displayStringArray();
   } else if (
     lastToken &&
     lastToken.type === "number" &&
@@ -254,10 +249,12 @@ answerButton.addEventListener("click", () => {
 });
 
 function createToken(tokenType, tokenValue, positionFromEnd, visibility) {
-  let token;
+  let token = {};
   switch (tokenType) {
     case "operator":
-      token = Calculator.operators[tokenValue];
+      token = {
+        ...Calculator.operators[tokenValue],
+      };
       token.type = "operator";
       token.id = Calculator.currentID;
       token.visibility = visibility;
@@ -277,19 +274,20 @@ function createToken(tokenType, tokenValue, positionFromEnd, visibility) {
   Calculator.currentID += 1;
 
   Calculator.tokenArray.splice(
-    Calculator.tokenArray.length - positionFromEnd,
+    Calculator.currentIndex + 1 - positionFromEnd,
     0,
     token
   );
-
+  Calculator.currentIndex += 1;
   stringifyTokenArray();
 }
 
 function deleteToken(positionFromEnd) {
   const deletedToken = Calculator.tokenArray.splice(
-    Calculator.tokenArray.length - 1 - positionFromEnd,
+    Calculator.currentIndex - positionFromEnd,
     1
   );
+  Calculator.currentIndex -= 1;
   stringifyTokenArray();
   // subtractStringArray(deletedToken[0]);
 }
@@ -372,13 +370,16 @@ function implicitMultiply() {
 
 function reset() {
   Calculator.currentID = 0;
+  Calculator.currentIndex = -1;
   Calculator.tokenArray = [];
   Calculator.display.topDisplayText = "";
   Calculator.display.bottomDisplayText = "";
   Calculator.display.stringArray = [];
   Calculator.display.stringExpression = "";
-  Calculator.display.currentIndex = -1;
+  Calculator.display.currentIndex = 0;
   Calculator.ANS = undefined;
+  Calculator.powerLevels.currentPowerLevel = 0;
+  Calculator.powerLevels.openParentheses = [];
   Calculator.openParentheses = 0;
   displayTop.textContent = Calculator.display.topDisplayText;
   displayBottom.textContent = Calculator.display.bottomDisplayText;
