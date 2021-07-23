@@ -132,6 +132,22 @@ operatorButtons.forEach((button) => {
         createToken("parenthesis", "(", 0, false);
         createToken("parenthesis", ")", 0, false);
         Calculator.currentIndex -= 1;
+      } else if (
+        Calculator.powerLevels.currentPowerLevel > 0 &&
+        !Calculator.powerLevels.openParentheses[
+          Calculator.powerLevels.currentPowerLevel
+        ]
+      ) {
+        while (
+          !Calculator.powerLevels.openParentheses[
+            Calculator.powerLevels.currentPowerLevel
+          ] &&
+          Calculator.powerLevels.currentPowerLevel > 0
+        ) {
+          Calculator.powerLevels.currentPowerLevel -= 1;
+          Calculator.currentIndex += 1;
+        }
+        createToken("operator", buttonValue, 0, true);
       } else {
         createToken("operator", buttonValue, 0, true);
       }
