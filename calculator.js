@@ -89,6 +89,7 @@ const parenthesisButtons = document.querySelectorAll(
 const evaluateButton = document.querySelector("[data-type='evaluate']");
 const resetButton = document.querySelector("[data-type='reset']");
 const answerButton = document.querySelector("[data-type='answer']");
+const backspaceButton = document.querySelector("[data-type='backspace']");
 
 numberButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
@@ -307,6 +308,8 @@ evaluateButton.addEventListener("click", () => {
   displayTop.textContent = Calculator.display.topDisplayText;
   displayBottom.textContent = Calculator.display.bottomDisplayText;
 });
+
+backspaceButton.addEventListener("click", () => {});
 
 resetButton.addEventListener("click", reset);
 
