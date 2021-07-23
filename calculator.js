@@ -124,8 +124,7 @@ operatorButtons.forEach((button) => {
 
     if (
       lastToken &&
-      (lastToken.type === "number" ||
-        (lastToken.value === ")" && lastToken.visibility))
+      (lastToken.type === "number" || lastToken.value === ")") // && lastToken.visibility))
     ) {
       if (buttonValue === "^" || buttonValue === "root") {
         createToken("operator", buttonValue, 0, true);
@@ -178,9 +177,17 @@ parenthesisButtons.forEach((button) => {
         ] &&
         Calculator.tokenArray[Calculator.currentIndex].value !== "("
       ) {
-        Calculator.powerLevels.currentPowerLevel = 0;
-        Calculator.currentIndex = Calculator.tokenArray.length - 1;
-      } else if (
+        while (
+          !Calculator.powerLevels.openParentheses[
+            Calculator.powerLevels.currentPowerLevel
+          ] &&
+          Calculator.powerLevels.currentPowerLevel > 0
+        ) {
+          Calculator.powerLevels.currentPowerLevel -= 1;
+          Calculator.currentIndex += 1;
+        }
+      }
+      if (
         lastToken &&
         (lastToken.type === "number" || lastToken.value === ")")
       ) {
@@ -199,6 +206,7 @@ parenthesisButtons.forEach((button) => {
       Calculator.powerLevels.openParentheses[
         Calculator.powerLevels.currentPowerLevel
       ] += 1;
+      Calculator.openParentheses += 1;
       // Calculator.openParentheses += 1;
       createToken("parenthesis", buttonValue, 0, true);
     } else if (
@@ -209,21 +217,48 @@ parenthesisButtons.forEach((button) => {
       lastToken.value !== "(" &&
       lastToken.type !== "operator"
     ) {
-      if (
-        !Calculator.powerLevels.openParentheses[
-          Calculator.powerLevels.currentPowerLevel
-        ]
-      ) {
-        Calculator.powerLevels.openParentheses[
-          Calculator.powerLevels.currentPowerLevel
-        ] = 0;
-      }
+      createToken("parenthesis", buttonValue, 0, true);
       Calculator.powerLevels.openParentheses[
         Calculator.powerLevels.currentPowerLevel
       ] -= 1;
-      // Calculator.openParentheses -= 1;
+      Calculator.openParentheses -= 1;
+      if (
+        !Calculator.powerLevels.openParentheses[
+          Calculator.powerLevels.currentPowerLevel
+        ] &&
+        Calculator.powerLevels.currentPowerLevel > 0
+      ) {
+        Calculator.powerLevels.currentPowerLevel -= 1;
+        Calculator.currentIndex += 1;
+      }
+    } else if (
+      buttonValue === ")" &&
+      !Calculator.powerLevels.openParentheses[
+        Calculator.powerLevels.currentPowerLevel
+      ] &&
+      Calculator.openParentheses &&
+      lastToken.value !== "(" &&
+      lastToken.type !== "operator"
+    ) {
+      while (
+        !Calculator.powerLevels.openParentheses[
+          Calculator.powerLevels.currentPowerLevel
+        ] &&
+        Calculator.powerLevels.currentPowerLevel > 0
+      ) {
+        Calculator.powerLevels.currentPowerLevel -= 1;
+        Calculator.currentIndex += 1;
+      }
       createToken("parenthesis", buttonValue, 0, true);
+      Calculator.powerLevels.openParentheses[
+        Calculator.powerLevels.currentPowerLevel
+      ] -= 1;
+      Calculator.openParentheses -= 1;
     }
+    // Calculator.powerLevels.openParentheses[
+    //   Calculator.powerLevels.currentPowerLevel
+    // ] -= 1;
+    // createToken("parenthesis", buttonValue, 0, true);
   });
 });
 
