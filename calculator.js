@@ -351,7 +351,29 @@ evaluateButton.addEventListener("click", () => {
   displayBottom.textContent = Calculator.display.bottomDisplayText;
 });
 
-backspaceButton.addEventListener("click", () => {});
+backspaceButton.addEventListener("click", () => {
+  let maxID;
+  if (Calculator.tokenArray.length) {
+    maxID = Calculator.tokenArray.reduce((a, b) => (a.id > b.id ? a : b)).id;
+  }
+  for (let i = Calculator.tokenArray.length - 1; i >= 0; i -= 1) {
+    if (Calculator.tokenArray[i].id === maxID) {
+      if (
+        Calculator.tokenArray[i].type === "number" &&
+        Calculator.tokenArray[i].value.length > 1
+      ) {
+        Calculator.tokenArray[i].value = Calculator.tokenArray[i].value.slice(
+          0,
+          -1
+        );
+        stringifyTokenArray();
+      } else {
+        Calculator.currentIndex = i;
+        deleteToken(Calculator.currentIndex);
+      }
+    }
+  }
+});
 
 resetButton.addEventListener("click", reset);
 
