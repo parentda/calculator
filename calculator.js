@@ -105,9 +105,9 @@ numberButtons.forEach((button) => {
       }
     } else if (Calculator.tokenArray.length && lastToken.value === ")") {
       implicitMultiply();
-      createToken("number", buttonValue, 0, true);
+      createToken("number", buttonValue, Calculator.currentIndex, true, true);
     } else {
-      createToken("number", buttonValue, 0, true);
+      createToken("number", buttonValue, Calculator.currentIndex, true, true);
     }
   });
 });
@@ -128,10 +128,16 @@ operatorButtons.forEach((button) => {
       (lastToken.type === "number" || lastToken.value === ")") // && lastToken.visibility))
     ) {
       if (buttonValue === "^" || buttonValue === "root") {
-        createToken("operator", buttonValue, 0, true);
+        createToken(
+          "operator",
+          buttonValue,
+          Calculator.currentIndex,
+          true,
+          false
+        );
         Calculator.powerLevels.currentPowerLevel += 1;
-        createToken("parenthesis", "(", 0, false);
-        createToken("parenthesis", ")", 0, false);
+        createToken("parenthesis", "(", Calculator.currentIndex, false, false);
+        createToken("parenthesis", ")", Calculator.currentIndex, false, true);
         Calculator.currentIndex -= 1;
       } else if (
         Calculator.powerLevels.currentPowerLevel > 0 &&
@@ -148,9 +154,21 @@ operatorButtons.forEach((button) => {
           Calculator.powerLevels.currentPowerLevel -= 1;
           Calculator.currentIndex += 1;
         }
-        createToken("operator", buttonValue, 0, true);
+        createToken(
+          "operator",
+          buttonValue,
+          Calculator.currentIndex,
+          true,
+          true
+        );
       } else {
-        createToken("operator", buttonValue, 0, true);
+        createToken(
+          "operator",
+          buttonValue,
+          Calculator.currentIndex,
+          true,
+          true
+        );
       }
     }
   });
@@ -166,17 +184,23 @@ unaryOperatorButton.addEventListener("click", (event) => {
     (lastToken.type === "operator" && lastToken.notation === "infix") ||
     lastToken.value === "("
   ) {
-    createToken("operator", buttonValue, 0, true);
+    createToken("operator", buttonValue, Calculator.currentIndex, true, true);
   } else if (lastToken.value === ")") {
     implicitMultiply();
-    createToken("operator", buttonValue, 0, true);
+    createToken("operator", buttonValue, Calculator.currentIndex, true, true);
   } else if (lastToken.notation === "prefix") {
-    deleteToken(0);
+    deleteToken(Calculator.currentIndex);
   } else if (lastToken.type === "number") {
     if (secondLastToken && secondLastToken.notation === "prefix") {
-      deleteToken(1);
+      deleteToken(Calculator.currentIndex - 1);
     } else {
-      createToken("operator", buttonValue, 1, true);
+      createToken(
+        "operator",
+        buttonValue,
+        Calculator.currentIndex - 1,
+        true,
+        true
+      );
     }
   }
 });
@@ -225,7 +249,13 @@ parenthesisButtons.forEach((button) => {
       ] += 1;
       Calculator.openParentheses += 1;
       // Calculator.openParentheses += 1;
-      createToken("parenthesis", buttonValue, 0, true);
+      createToken(
+        "parenthesis",
+        buttonValue,
+        Calculator.currentIndex,
+        true,
+        true
+      );
     } else if (
       buttonValue === ")" &&
       Calculator.powerLevels.openParentheses[
@@ -234,7 +264,13 @@ parenthesisButtons.forEach((button) => {
       lastToken.value !== "(" &&
       lastToken.type !== "operator"
     ) {
-      createToken("parenthesis", buttonValue, 0, true);
+      createToken(
+        "parenthesis",
+        buttonValue,
+        Calculator.currentIndex,
+        true,
+        true
+      );
       Calculator.powerLevels.openParentheses[
         Calculator.powerLevels.currentPowerLevel
       ] -= 1;
@@ -266,7 +302,13 @@ parenthesisButtons.forEach((button) => {
         Calculator.powerLevels.currentPowerLevel -= 1;
         Calculator.currentIndex += 1;
       }
-      createToken("parenthesis", buttonValue, 0, true);
+      createToken(
+        "parenthesis",
+        buttonValue,
+        Calculator.currentIndex,
+        true,
+        true
+      );
       Calculator.powerLevels.openParentheses[
         Calculator.powerLevels.currentPowerLevel
       ] -= 1;
@@ -288,7 +330,7 @@ evaluateButton.addEventListener("click", () => {
     0
   );
   for (let i = 0; i < openParentheses; i += 1) {
-    createToken("parenthesis", ")", 0, true);
+    createToken("parenthesis", ")", Calculator.currentIndex, true, true);
   }
   const parsedArray = parseTokenArray(Calculator.tokenArray);
   Calculator.ANS = evaluateParsedArray(parsedArray);
@@ -331,17 +373,17 @@ decimalButton.addEventListener("click", (event) => {
   ) {
     // do nothing
   } else {
-    createToken("number", buttonValue, 0, true);
+    createToken("number", buttonValue, Calculator.currentIndex, true, true);
   }
 });
 
 answerButton.addEventListener("click", () => {
   if (Calculator.ANS) {
-    createToken("number", Calculator.ANS, 0, true);
+    createToken("number", Calculator.ANS, Calculator.currentIndex, true, true);
   }
 });
 
-function createToken(tokenType, tokenValue, positionFromEnd, visibility) {
+function createToken(tokenType, tokenValue, index, visibility, incrementID) {
   let token = {};
   switch (tokenType) {
     case "operator":
@@ -364,22 +406,17 @@ function createToken(tokenType, tokenValue, positionFromEnd, visibility) {
       };
       break;
   }
-  Calculator.currentID += 1;
+  if (incrementID) {
+    Calculator.currentID += 1;
+  }
 
-  Calculator.tokenArray.splice(
-    Calculator.currentIndex + 1 - positionFromEnd,
-    0,
-    token
-  );
+  Calculator.tokenArray.splice(index + 1, 0, token);
   Calculator.currentIndex += 1;
   stringifyTokenArray();
 }
 
-function deleteToken(positionFromEnd) {
-  const deletedToken = Calculator.tokenArray.splice(
-    Calculator.currentIndex - positionFromEnd,
-    1
-  );
+function deleteToken(index) {
+  Calculator.tokenArray.splice(index, 1);
   Calculator.currentIndex -= 1;
   stringifyTokenArray();
   // subtractStringArray(deletedToken[0]);
@@ -458,7 +495,7 @@ function evaluateParsedArray(array) {
 }
 
 function implicitMultiply() {
-  createToken("operator", "*", 0, false);
+  createToken("operator", "*", Calculator.currentIndex, false, false);
 }
 
 function reset() {
