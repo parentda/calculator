@@ -15,6 +15,7 @@ const Calculator = {
     openParentheses: [],
   },
   openParentheses: 0,
+  tempCharacter: "&#9633;",
   operators: {
     "-": {
       value: "-",
@@ -57,7 +58,7 @@ const Calculator = {
     },
 
     "^": {
-      value: "&#9633;",
+      value: "^",
       notation: "infix",
       precedence: 40,
       associativity: "right",
@@ -65,7 +66,7 @@ const Calculator = {
     },
 
     root: {
-      value: ["&#9633;", "&#x0221A;"],
+      value: "&#x0221A;",
       notation: "infix",
       precedence: 40,
       associativity: "right",
@@ -128,13 +129,23 @@ operatorButtons.forEach((button) => {
       (lastToken.type === "number" || lastToken.value === ")") // && lastToken.visibility))
     ) {
       if (buttonValue === "^" || buttonValue === "root") {
-        createToken(
-          "operator",
-          buttonValue,
-          Calculator.currentIndex,
-          true,
-          false
-        );
+        if (buttonValue === "^") {
+          createToken(
+            "operator",
+            buttonValue,
+            Calculator.currentIndex,
+            false,
+            false
+          );
+        } else if (buttonValue === "root") {
+          createToken(
+            "operator",
+            buttonValue,
+            Calculator.currentIndex,
+            true,
+            false
+          );
+        }
         Calculator.powerLevels.currentPowerLevel += 1;
         createToken("parenthesis", "(", Calculator.currentIndex, false, false);
         createToken("parenthesis", ")", Calculator.currentIndex, false, true);
@@ -624,11 +635,59 @@ function displayStringArray() {
 }
 
 function stringifyTokenArray() {
+  Calculator.display.currentIndex = 0;
   let stringExpressionArray = [];
-  Calculator.tokenArray.forEach((token) => {
-    // if (token.visibility) {
-    stringExpressionArray.push(token.value);
-    // }
+  Calculator.tokenArray.forEach((token, index) => {
+    if (token.value === "^" || token.value === "&#x0221A;") {
+      if (token.value === "&#x0221A;") {
+        Calculator.display.currentIndex -= 1;
+        stringExpressionArray.splice(
+          Calculator.display.currentIndex,
+          0,
+          token.value
+        );
+      }
+      stringExpressionArray.splice(Calculator.display.currentIndex, 0, "<sup>");
+      Calculator.display.currentIndex += 1;
+      stringExpressionArray.splice(
+        Calculator.display.currentIndex,
+        0,
+        "</sup>"
+      );
+
+      if (
+        Calculator.tokenArray[index + 2] &&
+        !Calculator.tokenArray[index + 2].visibility
+      ) {
+        stringExpressionArray.splice(
+          Calculator.display.currentIndex,
+          0,
+          Calculator.tempCharacter
+        );
+        Calculator.display.currentIndex += 1;
+      }
+    } else if (token.visibility) {
+      stringExpressionArray.splice(
+        Calculator.display.currentIndex,
+        0,
+        token.value
+      );
+      Calculator.display.currentIndex += 1;
+    } else if (
+      Calculator.tokenArray[index + 1] &&
+      token.powerLevel > Calculator.tokenArray[index + 1].powerLevel
+      // && Calculator.tokenArray[index - 2].value !== "&#x0221A;"
+    ) {
+      Calculator.display.currentIndex = stringExpressionArray.length;
+
+      stringExpressionArray.splice(
+        Calculator.display.currentIndex,
+        0,
+        "</sup>"
+      );
+      // Calculator.display.currentIndex += 1;
+      // Calculator.display.currentIndex = stringExpressionArray.length;
+    }
   });
   Calculator.display.stringArray = stringExpressionArray;
   displayStringArray();
