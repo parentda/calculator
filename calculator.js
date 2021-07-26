@@ -34,7 +34,7 @@ const Calculator = {
     },
 
     "*": {
-      value: "*",
+      value: "&#xd7;",
       notation: "infix",
       precedence: 20,
       associativity: "left",
@@ -42,7 +42,7 @@ const Calculator = {
     },
 
     "/": {
-      value: "/",
+      value: "&#xf7;",
       notation: "infix",
       precedence: 20,
       associativity: "left",
@@ -669,6 +669,23 @@ function stringifyTokenArray() {
     } else if (token.visibility) {
       if (token.powerLevel === 0) {
         Calculator.display.currentIndex = stringExpressionArray.length;
+      }
+      if (
+        Calculator.tokenArray[index - 1] &&
+        ((Calculator.tokenArray[index - 1].value === "(" &&
+          Calculator.tokenArray[index - 1].visibility) ||
+          (token.type === "number" &&
+            Calculator.tokenArray[index - 1].precedence === 30) ||
+          (token.value === "(" &&
+            !Calculator.tokenArray[index - 1].visibility) ||
+          token.value === ")" ||
+          (!Calculator.tokenArray[index - 1].visibility &&
+            token.powerLevel === Calculator.tokenArray[index - 1].powerLevel))
+      ) {
+        // do nothing
+      } else {
+        stringExpressionArray.splice(Calculator.display.currentIndex, 0, " ");
+        Calculator.display.currentIndex += 1;
       }
       stringExpressionArray.splice(
         Calculator.display.currentIndex,
