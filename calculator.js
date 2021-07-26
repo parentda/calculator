@@ -667,6 +667,9 @@ function stringifyTokenArray() {
         Calculator.display.currentIndex += 1;
       }
     } else if (token.visibility) {
+      if (token.powerLevel === 0) {
+        Calculator.display.currentIndex = stringExpressionArray.length;
+      }
       stringExpressionArray.splice(
         Calculator.display.currentIndex,
         0,
@@ -676,17 +679,8 @@ function stringifyTokenArray() {
     } else if (
       Calculator.tokenArray[index + 1] &&
       token.powerLevel > Calculator.tokenArray[index + 1].powerLevel
-      // && Calculator.tokenArray[index - 2].value !== "&#x0221A;"
     ) {
-      Calculator.display.currentIndex = stringExpressionArray.length;
-
-      stringExpressionArray.splice(
-        Calculator.display.currentIndex,
-        0,
-        "</sup>"
-      );
-      // Calculator.display.currentIndex += 1;
-      // Calculator.display.currentIndex = stringExpressionArray.length;
+      Calculator.display.currentIndex += 1;
     }
   });
   Calculator.display.stringArray = stringExpressionArray;
