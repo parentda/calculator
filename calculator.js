@@ -395,9 +395,22 @@ backspaceButton.addEventListener("click", () => {
           -1
         );
         stringifyTokenArray();
+        break;
       } else {
         Calculator.currentIndex = i;
-        deleteToken(Calculator.currentIndex);
+        const deletedToken = deleteToken(Calculator.currentIndex)[0];
+        if (deletedToken.value === ")" && deletedToken.visibility) {
+          Calculator.powerLevels.openParentheses[deletedToken.powerLevel] += 1;
+          Calculator.openParentheses += 1;
+        } else if (deletedToken.value === "(" && deletedToken.visibility) {
+          Calculator.powerLevels.openParentheses[deletedToken.powerLevel] -= 1;
+          Calculator.openParentheses -= 1;
+        }
+        if (Calculator.tokenArray[Calculator.currentIndex]) {
+          Calculator.powerLevels.currentPowerLevel =
+            Calculator.tokenArray[Calculator.currentIndex].powerLevel;
+        }
+        // Calculator.powerLevels.currentPowerLevel = deletedToken.powerLevel;
       }
     }
   }
@@ -466,10 +479,10 @@ function createToken(tokenType, tokenValue, index, visibility, incrementID) {
 }
 
 function deleteToken(index) {
-  Calculator.tokenArray.splice(index, 1);
+  const deletedToken = Calculator.tokenArray.splice(index, 1);
   Calculator.currentIndex -= 1;
   stringifyTokenArray();
-  // subtractStringArray(deletedToken[0]);
+  return deletedToken;
 }
 
 function shuntingYardAlgorithm(token, outQueue, opStack) {
