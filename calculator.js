@@ -4,7 +4,8 @@ const Calculator = {
   tokenArray: [],
   display: {
     currentIndex: 0,
-    indexFromEnd: -1,
+    indexFromEnd: 0,
+    returnIndex: [],
     stringArray: [],
     stringExpression: "",
     topDisplayText: "",
@@ -571,45 +572,60 @@ function displayStringArray() {
 
 function stringifyTokenArray() {
   Calculator.display.currentIndex = 0;
-  Calculator.display.indexFromEnd = -1;
-  let returnIndex = [];
-  let stringExpressionArray = [];
+  Calculator.display.indexFromEnd = 0;
+  Calculator.display.returnIndex = [];
+  Calculator.display.stringArray = [];
   Calculator.tokenArray.forEach((token, index) => {
     if (token.value === "^" || token.value === "&#x0221A;") {
+      Calculator.display.returnIndex.push(Calculator.display.indexFromEnd);
       if (token.value === "&#x0221A;") {
-        returnIndex.push(
-          stringExpressionArray.length - 1 - Calculator.display.currentIndex
-        );
-        Calculator.display.currentIndex -= 1;
-        stringExpressionArray.splice(
-          Calculator.display.currentIndex,
+        Calculator.display.indexFromEnd -= 1;
+        if (Calculator.display.indexFromEnd === 0) {
+          Calculator.display.stringArray.push(token.value);
+        } else {
+          Calculator.display.stringArray.splice(
+            Calculator.display.indexFromEnd,
+            0,
+            token.value
+          );
+        }
+        Calculator.display.indexFromEnd -= 1;
+      }
+      if (Calculator.display.indexFromEnd === 0) {
+        Calculator.display.stringArray.push("<sup>");
+      } else {
+        Calculator.display.stringArray.splice(
+          Calculator.display.indexFromEnd,
           0,
-          token.value
+          "<sup>"
         );
       }
-      stringExpressionArray.splice(Calculator.display.currentIndex, 0, "<sup>");
-      Calculator.display.currentIndex += 1;
-      stringExpressionArray.splice(
-        Calculator.display.currentIndex,
-        0,
-        "</sup>"
-      );
+      if (Calculator.display.indexFromEnd === 0) {
+        Calculator.display.stringArray.push("</sup>");
+      } else {
+        Calculator.display.stringArray.splice(
+          Calculator.display.indexFromEnd,
+          0,
+          "</sup>"
+        );
+      }
+      Calculator.display.indexFromEnd -= 1;
 
       if (
         Calculator.tokenArray[index + 2] &&
         !Calculator.tokenArray[index + 2].visibility
       ) {
-        stringExpressionArray.splice(
-          Calculator.display.currentIndex,
+        Calculator.display.stringArray.splice(
+          Calculator.display.indexFromEnd,
           0,
           Calculator.tempCharacter
         );
-        Calculator.display.currentIndex += 1;
+        // Calculator.display.indexFromEnd += 1;
       }
     } else if (token.visibility) {
-      if (token.powerLevel === 0) {
-        Calculator.display.currentIndex = stringExpressionArray.length;
-      }
+      // if (token.powerLevel === 0) {
+      //   Calculator.display.currentIndex = Calculator.display.stringArray.length;
+      // }
       if (
         Calculator.tokenArray[index - 1] &&
         ((Calculator.tokenArray[index - 1].value === "(" &&
@@ -623,28 +639,34 @@ function stringifyTokenArray() {
             token.powerLevel === Calculator.tokenArray[index - 1].powerLevel))
       ) {
         // do nothing
+      } else if (Calculator.display.indexFromEnd === 0) {
+        Calculator.display.stringArray.push(" ");
       } else {
-        stringExpressionArray.splice(Calculator.display.currentIndex, 0, " ");
-        Calculator.display.currentIndex += 1;
+        Calculator.display.stringArray.splice(
+          Calculator.display.indexFromEnd,
+          0,
+          " "
+        );
       }
-      stringExpressionArray.splice(
-        Calculator.display.currentIndex,
-        0,
-        token.value
-      );
-      Calculator.display.currentIndex += 1;
+
+      if (Calculator.display.indexFromEnd === 0) {
+        Calculator.display.stringArray.push(token.value);
+      } else {
+        Calculator.display.stringArray.splice(
+          Calculator.display.indexFromEnd,
+          0,
+          token.value
+        );
+      }
     } else if (
       Calculator.tokenArray[index + 1] &&
       token.powerLevel > Calculator.tokenArray[index + 1].powerLevel
     ) {
-      if (returnIndex.length) {
-        Calculator.display.currentIndex =
-          stringExpressionArray.length - 1 - returnIndex.pop();
-      } else {
-        Calculator.display.currentIndex += 1;
+      if (Calculator.display.returnIndex.length) {
+        Calculator.display.indexFromEnd = Calculator.display.returnIndex.pop();
       }
     }
   });
-  Calculator.display.stringArray = stringExpressionArray;
+
   displayStringArray();
 }
