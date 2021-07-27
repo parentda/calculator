@@ -107,6 +107,15 @@ numberButtons.forEach((button) => {
         stringifyTokenArray();
       }
     } else if (Calculator.tokenArray.length && lastToken.value === ")") {
+      while (
+        !Calculator.powerLevels.openParentheses[
+          Calculator.powerLevels.currentPowerLevel
+        ] &&
+        Calculator.powerLevels.currentPowerLevel > 0
+      ) {
+        Calculator.powerLevels.currentPowerLevel -= 1;
+        Calculator.currentIndex += 1;
+      }
       implicitMultiply();
       createToken("number", buttonValue, Calculator.currentIndex, true, true);
     } else {
@@ -203,9 +212,11 @@ unaryOperatorButton.addEventListener("click", (event) => {
     createToken("operator", buttonValue, Calculator.currentIndex, true, true);
   } else if (lastToken.notation === "prefix") {
     deleteToken(Calculator.currentIndex);
+    stringifyTokenArray();
   } else if (lastToken.type === "number") {
     if (secondLastToken && secondLastToken.notation === "prefix") {
       deleteToken(Calculator.currentIndex - 1);
+      stringifyTokenArray();
     } else {
       createToken(
         "operator",
@@ -410,7 +421,22 @@ backspaceButton.addEventListener("click", () => {
           Calculator.powerLevels.currentPowerLevel =
             Calculator.tokenArray[Calculator.currentIndex].powerLevel;
         }
+        while (
+          Calculator.tokenArray[Calculator.currentIndex] &&
+          Calculator.tokenArray[Calculator.currentIndex].value === ")" &&
+          !Calculator.tokenArray[Calculator.currentIndex].visibility
+        ) {
+          Calculator.currentIndex -= 1;
+        }
+        // if (
+        //   Calculator.tokenArray[Calculator.currentIndex - 1] &&
+        //   Calculator.tokenArray[Calculator.currentIndex - 1].value === ")" &&
+        //   !Calculator.tokenArray[Calculator.currentIndex - 1].visibility
+        // ) {
+        //   Calculator.currentIndex -= 1;
+        // }
         // Calculator.powerLevels.currentPowerLevel = deletedToken.powerLevel;
+        stringifyTokenArray();
       }
     }
   }
@@ -481,7 +507,6 @@ function createToken(tokenType, tokenValue, index, visibility, incrementID) {
 function deleteToken(index) {
   const deletedToken = Calculator.tokenArray.splice(index, 1);
   Calculator.currentIndex -= 1;
-  stringifyTokenArray();
   return deletedToken;
 }
 
