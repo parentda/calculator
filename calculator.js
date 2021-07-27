@@ -288,15 +288,15 @@ parenthesisButtons.forEach((button) => {
         Calculator.powerLevels.currentPowerLevel
       ] -= 1;
       Calculator.openParentheses -= 1;
-      if (
-        !Calculator.powerLevels.openParentheses[
-          Calculator.powerLevels.currentPowerLevel
-        ] &&
-        Calculator.powerLevels.currentPowerLevel > 0
-      ) {
-        Calculator.powerLevels.currentPowerLevel -= 1;
-        Calculator.currentIndex += 1;
-      }
+      // if (
+      //   !Calculator.powerLevels.openParentheses[
+      //     Calculator.powerLevels.currentPowerLevel
+      //   ] &&
+      //   Calculator.powerLevels.currentPowerLevel > 0
+      // ) {
+      //   Calculator.powerLevels.currentPowerLevel -= 1;
+      //   Calculator.currentIndex += 1;
+      // }
     } else if (
       buttonValue === ")" &&
       !Calculator.powerLevels.openParentheses[
