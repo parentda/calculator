@@ -351,11 +351,12 @@ evaluateButton.addEventListener("click", () => {
   }
 
   let lastIndex = Calculator.tokenArray.length - 1;
-  while (
-    !Calculator.tokenArray[lastIndex].visibility ||
-    Calculator.tokenArray[lastIndex].precedence < 40
-  ) {
-    lastIndex -= 1;
+  while (!Calculator.tokenArray[lastIndex].visibility) {
+    if (Calculator.tokenArray[lastIndex].precedence > 30) {
+      break;
+    } else {
+      lastIndex -= 1;
+    }
   }
   if (
     Calculator.tokenArray[lastIndex].type === "operator" ||
