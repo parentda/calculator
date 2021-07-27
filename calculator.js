@@ -717,7 +717,7 @@ function stringifyTokenArray() {
         Calculator.tokenArray[index - 1] &&
         ((Calculator.tokenArray[index - 1].value === "(" &&
           Calculator.tokenArray[index - 1].visibility) ||
-          (token.type === "number" &&
+          ((token.type === "number" || token.value === "(") &&
             Calculator.tokenArray[index - 1].precedence === 30) ||
           (token.value === "(" &&
             !Calculator.tokenArray[index - 1].visibility) ||
