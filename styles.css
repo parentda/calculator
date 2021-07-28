@@ -31,8 +31,23 @@ main {
 #display {
   grid-row: 1 / 1;
   grid-column: 1 / 7;
-  text-align: right;
+
+  /* height: 1em; */
   width: 600px;
+  /* direction: rtl; */
+  /* white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; */
+}
+
+#display-top {
+  height: 20px;
+  text-align: right;
+}
+
+#display-bottom {
+  height: 20px;
+  text-align: right;
 }
 
 button {

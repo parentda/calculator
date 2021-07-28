@@ -375,20 +375,9 @@ evaluateButton.addEventListener("click", () => {
   const parsedArray = parseTokenArray(Calculator.tokenArray);
   Calculator.ANS = evaluateParsedArray(parsedArray);
 
-  Calculator.currentID = 0;
-  Calculator.currentIndex = -1;
-  Calculator.tokenArray = [];
+  reset(false, false);
   Calculator.display.topDisplayText = Calculator.ANS;
-  Calculator.display.bottomDisplayText = "";
-  Calculator.display.stringArray = [];
-  Calculator.display.stringExpression = "";
-  Calculator.display.currentIndex = 0;
-  Calculator.ANS = undefined;
-  Calculator.powerLevels.currentPowerLevel = 0;
-  Calculator.powerLevels.openParentheses = [];
-  Calculator.openParentheses = 0;
   displayTop.textContent = Calculator.display.topDisplayText;
-  displayBottom.textContent = Calculator.display.bottomDisplayText;
 });
 
 backspaceButton.addEventListener("click", () => {
@@ -443,7 +432,9 @@ backspaceButton.addEventListener("click", () => {
   }
 });
 
-resetButton.addEventListener("click", reset);
+resetButton.addEventListener("click", () => {
+  reset(true, true);
+});
 
 decimalButton.addEventListener("click", (event) => {
   const buttonValue = event.target.textContent;
@@ -469,7 +460,7 @@ decimalButton.addEventListener("click", (event) => {
 
 answerButton.addEventListener("click", () => {
   if (Calculator.ANS) {
-    createToken("number", Calculator.ANS, Calculator.currentIndex, true, true);
+    createToken("number", "ANS", Calculator.currentIndex, true, true);
   }
 });
 
@@ -563,17 +554,25 @@ function evaluateParsedArray(array) {
     let token = array[currentIndex];
     if (token.type === "operator") {
       if (token.notation === "infix") {
-        array[currentIndex - 2].value = token.compute(
-          +array[currentIndex - 2].value,
-          +array[currentIndex - 1].value
-        );
+        const num1 =
+          array[currentIndex - 2].value === "ANS"
+            ? Calculator.ANS
+            : +array[currentIndex - 2].value;
+        const num2 =
+          array[currentIndex - 1].value === "ANS"
+            ? Calculator.ANS
+            : +array[currentIndex - 1].value;
+
+        array[currentIndex - 2].value = token.compute(num1, num2);
         currentIndex -= 2;
         array.splice(currentIndex + 1, 2);
       }
       if (token.notation === "prefix") {
-        array[currentIndex - 1].value = token.compute(
-          +array[currentIndex - 1].value
-        );
+        const num1 =
+          array[currentIndex - 1].value === "ANS"
+            ? Calculator.ANS
+            : +array[currentIndex - 1].value;
+        array[currentIndex - 1].value = token.compute(num1);
         currentIndex -= 1;
         array.splice(currentIndex + 1, 1);
       }
@@ -587,21 +586,26 @@ function implicitMultiply() {
   createToken("operator", "*", Calculator.currentIndex, false, false);
 }
 
-function reset() {
+function reset(resetANS, resetTopDisplay) {
   Calculator.currentID = 0;
   Calculator.currentIndex = -1;
   Calculator.tokenArray = [];
-  Calculator.display.topDisplayText = "";
   Calculator.display.bottomDisplayText = "";
   Calculator.display.stringArray = [];
   Calculator.display.stringExpression = "";
   Calculator.display.currentIndex = 0;
-  Calculator.ANS = undefined;
   Calculator.powerLevels.currentPowerLevel = 0;
   Calculator.powerLevels.openParentheses = [];
   Calculator.openParentheses = 0;
   displayTop.textContent = Calculator.display.topDisplayText;
   displayBottom.textContent = Calculator.display.bottomDisplayText;
+
+  if (resetANS) {
+    Calculator.ANS = undefined;
+  }
+  if (resetTopDisplay) {
+    Calculator.display.topDisplayText = "";
+  }
 }
 
 function displayStringArray() {
