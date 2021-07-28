@@ -11,7 +11,7 @@ const Calculator = {
     topDisplayText: "",
     bottomDisplayText: "",
   },
-  ANS: undefined,
+  ANS: 0,
   powerLevels: {
     currentPowerLevel: 0,
     openParentheses: [],
@@ -392,7 +392,8 @@ backspaceButton.addEventListener("click", () => {
     if (Calculator.tokenArray[i].id === maxID) {
       if (
         Calculator.tokenArray[i].type === "number" &&
-        Calculator.tokenArray[i].value.length > 1
+        Calculator.tokenArray[i].value.length > 1 &&
+        Calculator.tokenArray[i].value !== "ANS"
       ) {
         Calculator.tokenArray[i].value = Calculator.tokenArray[i].value.slice(
           0,
@@ -467,9 +468,32 @@ decimalButton.addEventListener("click", (event) => {
   }
 });
 
-answerButton.addEventListener("click", () => {
-  if (Calculator.ANS) {
-    createToken("number", "ANS", Calculator.currentIndex, true, true);
+answerButton.addEventListener("click", (event) => {
+  // if (Calculator.ANS) {
+  //   createToken("number", "ANS", Calculator.currentIndex, true, true);
+  // }
+  const buttonValue = event.target.textContent;
+  const lastToken = Calculator.tokenArray[Calculator.currentIndex];
+
+  if (lastToken && lastToken.type === "number") {
+    if (lastToken.value === "0") {
+      lastToken.value = buttonValue;
+      stringifyTokenArray();
+    }
+  } else if (Calculator.tokenArray.length && lastToken.value === ")") {
+    while (
+      !Calculator.powerLevels.openParentheses[
+        Calculator.powerLevels.currentPowerLevel
+      ] &&
+      Calculator.powerLevels.currentPowerLevel > 0
+    ) {
+      Calculator.powerLevels.currentPowerLevel -= 1;
+      Calculator.currentIndex += 1;
+    }
+    implicitMultiply();
+    createToken("number", buttonValue, Calculator.currentIndex, true, true);
+  } else {
+    createToken("number", buttonValue, Calculator.currentIndex, true, true);
   }
 });
 
@@ -588,6 +612,9 @@ function evaluateParsedArray(array) {
     }
     currentIndex += 1;
   }
+  if (array[array.length - 1].value === "ANS") {
+    array[array.length - 1].value = Calculator.ANS;
+  }
   return array[array.length - 1].value;
 }
 
@@ -610,7 +637,7 @@ function reset(resetANS, resetTopDisplay) {
   // displayBottom.textContent = Calculator.display.bottomDisplayText;
 
   if (resetANS) {
-    Calculator.ANS = undefined;
+    Calculator.ANS = 0;
   }
   if (resetTopDisplay) {
     Calculator.display.topDisplayText = "";
