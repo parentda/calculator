@@ -100,7 +100,10 @@ numberButtons.forEach((button) => {
     const lastToken = Calculator.tokenArray[Calculator.currentIndex];
 
     if (lastToken && lastToken.type === "number") {
-      if (buttonValue === "0" && lastToken.value === "0") {
+      if (
+        (buttonValue === "0" && lastToken.value === "0") ||
+        lastToken.value === "ANS"
+      ) {
         // do nothing
       } else if (buttonValue !== "0" && lastToken.value === "0") {
         lastToken.value = buttonValue;
@@ -399,7 +402,7 @@ backspaceButton.addEventListener("click", () => {
           0,
           -1
         );
-        stringifyTokenArray();
+        // stringifyTokenArray();
         break;
       } else {
         Calculator.currentIndex = i;
@@ -430,10 +433,14 @@ backspaceButton.addEventListener("click", () => {
         //   Calculator.currentIndex -= 1;
         // }
         // Calculator.powerLevels.currentPowerLevel = deletedToken.powerLevel;
-        stringifyTokenArray();
+        // stringifyTokenArray();
       }
     }
   }
+  if (!Calculator.tokenArray.length) {
+    initializeTokenArray("number", "0");
+  }
+  stringifyTokenArray();
 });
 
 resetButton.addEventListener("click", () => {
@@ -443,20 +450,19 @@ resetButton.addEventListener("click", () => {
 decimalButton.addEventListener("click", (event) => {
   const buttonValue = event.target.textContent;
   const lastToken = Calculator.tokenArray[Calculator.currentIndex];
-
   if (
+    lastToken &&
+    lastToken.type === "number" &&
+    (lastToken.value.includes(".") || lastToken.value === "ANS")
+  ) {
+    // do nothing
+  } else if (
     lastToken &&
     lastToken.type === "number" &&
     !lastToken.value.includes(".")
   ) {
     lastToken.value += buttonValue;
     stringifyTokenArray();
-  } else if (
-    lastToken &&
-    lastToken.type === "number" &&
-    lastToken.value.includes(".")
-  ) {
-    // do nothing
   } else {
     createToken(
       "number",
