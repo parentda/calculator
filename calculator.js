@@ -102,6 +102,9 @@ numberButtons.forEach((button) => {
     if (lastToken && lastToken.type === "number") {
       if (buttonValue === "0" && lastToken.value === "0") {
         // do nothing
+      } else if (buttonValue !== "0" && lastToken.value === "0") {
+        lastToken.value = buttonValue;
+        stringifyTokenArray();
       } else {
         lastToken.value += buttonValue;
         stringifyTokenArray();
@@ -454,7 +457,13 @@ decimalButton.addEventListener("click", (event) => {
   ) {
     // do nothing
   } else {
-    createToken("number", buttonValue, Calculator.currentIndex, true, true);
+    createToken(
+      "number",
+      `0${buttonValue}`,
+      Calculator.currentIndex,
+      true,
+      true
+    );
   }
 });
 
@@ -590,15 +599,15 @@ function reset(resetANS, resetTopDisplay) {
   Calculator.currentID = 0;
   Calculator.currentIndex = -1;
   Calculator.tokenArray = [];
-  Calculator.display.bottomDisplayText = "";
+  // Calculator.display.bottomDisplayText = "";
   Calculator.display.stringArray = [];
-  Calculator.display.stringExpression = "";
+  // Calculator.display.stringExpression = "";
   Calculator.display.currentIndex = 0;
   Calculator.powerLevels.currentPowerLevel = 0;
   Calculator.powerLevels.openParentheses = [];
   Calculator.openParentheses = 0;
-  displayTop.textContent = Calculator.display.topDisplayText;
-  displayBottom.textContent = Calculator.display.bottomDisplayText;
+  // displayTop.textContent = Calculator.display.topDisplayText;
+  // displayBottom.textContent = Calculator.display.bottomDisplayText;
 
   if (resetANS) {
     Calculator.ANS = undefined;
@@ -762,3 +771,9 @@ function stringifyTokenArray() {
 
   displayStringArray();
 }
+
+function initializeTokenArray(type, value) {
+  createToken(type, value, Calculator.currentIndex, true, true);
+}
+
+initializeTokenArray("number", "0");
