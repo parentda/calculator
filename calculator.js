@@ -1,6 +1,7 @@
 const Calculator = {
   currentID: 0,
   currentIndex: -1,
+  justEvaluated: false,
   tokenArray: [],
   display: {
     currentIndex: 0,
@@ -11,7 +12,7 @@ const Calculator = {
     topDisplayText: "",
     bottomDisplayText: "",
   },
-  ANS: 0,
+  ANS: "0",
   powerLevels: {
     currentPowerLevel: 0,
     openParentheses: [],
@@ -98,8 +99,10 @@ numberButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
     const buttonValue = event.target.textContent;
     const lastToken = Calculator.tokenArray[Calculator.currentIndex];
-
-    if (lastToken && lastToken.type === "number") {
+    if (Calculator.justEvaluated) {
+      lastToken.value = buttonValue;
+      stringifyTokenArray();
+    } else if (lastToken && lastToken.type === "number") {
       if (
         (buttonValue === "0" && lastToken.value === "0") ||
         lastToken.value === "ANS"
@@ -382,8 +385,11 @@ evaluateButton.addEventListener("click", () => {
   Calculator.ANS = evaluateParsedArray(parsedArray);
 
   reset(false, false);
-  Calculator.display.topDisplayText = Calculator.ANS;
-  displayTop.textContent = Calculator.display.topDisplayText;
+  Calculator.display.topDisplayText = `${Calculator.display.stringExpression} =`;
+  displayTop.innerHTML = Calculator.display.topDisplayText;
+  initializeTokenArray("number", Calculator.ANS);
+  stringifyTokenArray();
+  Calculator.justEvaluated = true;
 });
 
 backspaceButton.addEventListener("click", () => {
@@ -444,7 +450,11 @@ backspaceButton.addEventListener("click", () => {
 });
 
 resetButton.addEventListener("click", () => {
-  reset(true, true);
+  reset(false, false);
+  Calculator.display.topDisplayText = `ANS = ${Calculator.ANS}`;
+  displayTop.innerHTML = Calculator.display.topDisplayText;
+  initializeTokenArray("number", "0");
+  stringifyTokenArray();
 });
 
 decimalButton.addEventListener("click", (event) => {
@@ -480,8 +490,10 @@ answerButton.addEventListener("click", (event) => {
   // }
   const buttonValue = event.target.textContent;
   const lastToken = Calculator.tokenArray[Calculator.currentIndex];
-
-  if (lastToken && lastToken.type === "number") {
+  if (Calculator.justEvaluated) {
+    lastToken.value = buttonValue;
+    stringifyTokenArray();
+  } else if (lastToken && lastToken.type === "number") {
     if (lastToken.value === "0") {
       lastToken.value = buttonValue;
       stringifyTokenArray();
@@ -595,11 +607,11 @@ function evaluateParsedArray(array) {
       if (token.notation === "infix") {
         const num1 =
           array[currentIndex - 2].value === "ANS"
-            ? Calculator.ANS
+            ? +Calculator.ANS
             : +array[currentIndex - 2].value;
         const num2 =
           array[currentIndex - 1].value === "ANS"
-            ? Calculator.ANS
+            ? +Calculator.ANS
             : +array[currentIndex - 1].value;
 
         array[currentIndex - 2].value = token.compute(num1, num2);
@@ -609,7 +621,7 @@ function evaluateParsedArray(array) {
       if (token.notation === "prefix") {
         const num1 =
           array[currentIndex - 1].value === "ANS"
-            ? Calculator.ANS
+            ? +Calculator.ANS
             : +array[currentIndex - 1].value;
         array[currentIndex - 1].value = token.compute(num1);
         currentIndex -= 1;
@@ -621,7 +633,7 @@ function evaluateParsedArray(array) {
   if (array[array.length - 1].value === "ANS") {
     array[array.length - 1].value = Calculator.ANS;
   }
-  return array[array.length - 1].value;
+  return array[array.length - 1].value.toString();
 }
 
 function implicitMultiply() {
@@ -651,8 +663,13 @@ function reset(resetANS, resetTopDisplay) {
 }
 
 function displayStringArray() {
+  if (Calculator.justEvaluated) {
+    Calculator.display.topDisplayText = `ANS = ${Calculator.ANS}`;
+    displayTop.innerHTML = Calculator.display.topDisplayText;
+  }
   Calculator.display.stringExpression = Calculator.display.stringArray.join("");
   displayBottom.innerHTML = Calculator.display.stringExpression;
+  Calculator.justEvaluated = false;
 }
 
 function stringifyTokenArray() {
