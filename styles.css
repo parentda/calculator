@@ -43,7 +43,7 @@ main {
 
 #display-top {
   /* height: auto; */
-  text-align: right;
+  /* text-align: right; */
 }
 
 /* #wrapper {
@@ -53,21 +53,25 @@ main {
 
 #display p {
   /* display: flex; */
-  line-height: normal;
+  /* line-height: 1.5em; */
   text-align: right;
   vertical-align: bottom;
   direction: rtl;
   white-space: nowrap;
-  overflow: hidden;
+  overflow-x: hidden;
   /* overflow-y: visible; */
   text-overflow: ellipsis;
+  margin: 0;
+  padding: 20px 0 20px 0;
 }
 
-/* sup {
+sup {
   vertical-align: baseline;
   position: relative;
-  top: -0.3em;
-} */
+  top: -0.25em;
+  line-height: 0;
+  font-size: 90%;
+}
 
 button {
   width: 75px;
