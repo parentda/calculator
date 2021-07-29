@@ -1,6 +1,7 @@
 :root {
   font-family: Menlo;
   font-size: 20px;
+  --display-height: 100px;
 }
 
 body,
@@ -18,7 +19,7 @@ main {
 
 #calculator {
   display: grid;
-  grid-template-rows: 100px repeat(4, auto);
+  grid-template-rows: var(--display-height) repeat(4, auto);
   grid-template-columns: repeat(6, auto);
   grid-gap: 5px 5px;
   padding: 20px;
@@ -34,6 +35,7 @@ main {
   /* display: flex;
   flex-direction: column; */
   /* height: 1em; */
+  height: var(--display-height);
   width: 600px;
   /* direction: rtl; */
   /* white-space: nowrap;

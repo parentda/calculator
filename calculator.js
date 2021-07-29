@@ -133,6 +133,10 @@ numberButtons.forEach((button) => {
   });
 });
 
+document.addEventListener("keydown", (event) => {
+  console.log(event);
+});
+
 operatorButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
     let buttonValue;
