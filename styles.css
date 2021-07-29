@@ -31,7 +31,8 @@ main {
 #display {
   grid-row: 1 / 1;
   grid-column: 1 / 7;
-
+  /* display: flex;
+  flex-direction: column; */
   /* height: 1em; */
   width: 600px;
   /* direction: rtl; */
@@ -41,14 +42,32 @@ main {
 }
 
 #display-top {
-  height: 20px;
+  /* height: auto; */
   text-align: right;
 }
 
-#display-bottom {
-  height: 20px;
+/* #wrapper {
+  overflow: visible;
+  display: block;
+} */
+
+#display p {
+  /* display: flex; */
+  line-height: normal;
   text-align: right;
+  vertical-align: bottom;
+  direction: rtl;
+  white-space: nowrap;
+  overflow: hidden;
+  /* overflow-y: visible; */
+  text-overflow: ellipsis;
 }
+
+/* sup {
+  vertical-align: baseline;
+  position: relative;
+  top: -0.3em;
+} */
 
 button {
   width: 75px;
