@@ -81,6 +81,7 @@ const Calculator = {
 const displayTop = document.querySelector("#display-top");
 const displayBottom = document.querySelector("#display-bottom");
 
+const buttons = document.querySelectorAll("button");
 const numberButtons = document.querySelectorAll("[data-type='number']");
 const decimalButton = document.querySelector("[data-type='decimal']");
 const operatorButtons = document.querySelectorAll("[data-type='operator']");
@@ -95,27 +96,131 @@ const resetButton = document.querySelector("[data-type='reset']");
 const answerButton = document.querySelector("[data-type='answer']");
 const backspaceButton = document.querySelector("[data-type='backspace']");
 
-numberButtons.forEach((button) => {
-  button.addEventListener("click", (event) => {
-    const buttonValue = event.target.textContent;
-    const lastToken = Calculator.tokenArray[Calculator.currentIndex];
-    if (Calculator.justEvaluated) {
+buttons.forEach((button) => {
+  const buttonFunction = window[button.getAttribute("data-type")];
+  button.addEventListener("click", () => {
+    buttonFunction(button);
+  });
+});
+
+function number(button) {
+  const buttonValue = button.textContent;
+  const lastToken = Calculator.tokenArray[Calculator.currentIndex];
+  if (Calculator.justEvaluated) {
+    lastToken.value = buttonValue;
+    stringifyTokenArray();
+  } else if (lastToken && lastToken.type === "number") {
+    if (
+      (buttonValue === "0" && lastToken.value === "0") ||
+      lastToken.value === "ANS"
+    ) {
+      // do nothing
+    } else if (buttonValue !== "0" && lastToken.value === "0") {
       lastToken.value = buttonValue;
       stringifyTokenArray();
-    } else if (lastToken && lastToken.type === "number") {
-      if (
-        (buttonValue === "0" && lastToken.value === "0") ||
-        lastToken.value === "ANS"
-      ) {
-        // do nothing
-      } else if (buttonValue !== "0" && lastToken.value === "0") {
-        lastToken.value = buttonValue;
-        stringifyTokenArray();
-      } else {
-        lastToken.value += buttonValue;
-        stringifyTokenArray();
+    } else {
+      lastToken.value += buttonValue;
+      stringifyTokenArray();
+    }
+  } else if (Calculator.tokenArray.length && lastToken.value === ")") {
+    while (
+      !Calculator.powerLevels.openParentheses[
+        Calculator.powerLevels.currentPowerLevel
+      ] &&
+      Calculator.powerLevels.currentPowerLevel > 0
+    ) {
+      Calculator.powerLevels.currentPowerLevel -= 1;
+      Calculator.currentIndex += 1;
+    }
+    implicitMultiply();
+    createToken("number", buttonValue, Calculator.currentIndex, true, true);
+  } else {
+    createToken("number", buttonValue, Calculator.currentIndex, true, true);
+  }
+}
+
+// numberButtons.forEach((button) => {
+//   button.addEventListener("click", (event) => {
+//     const buttonValue = event.target.textContent;
+//     const lastToken = Calculator.tokenArray[Calculator.currentIndex];
+//     if (Calculator.justEvaluated) {
+//       lastToken.value = buttonValue;
+//       stringifyTokenArray();
+//     } else if (lastToken && lastToken.type === "number") {
+//       if (
+//         (buttonValue === "0" && lastToken.value === "0") ||
+//         lastToken.value === "ANS"
+//       ) {
+//         // do nothing
+//       } else if (buttonValue !== "0" && lastToken.value === "0") {
+//         lastToken.value = buttonValue;
+//         stringifyTokenArray();
+//       } else {
+//         lastToken.value += buttonValue;
+//         stringifyTokenArray();
+//       }
+//     } else if (Calculator.tokenArray.length && lastToken.value === ")") {
+//       while (
+//         !Calculator.powerLevels.openParentheses[
+//           Calculator.powerLevels.currentPowerLevel
+//         ] &&
+//         Calculator.powerLevels.currentPowerLevel > 0
+//       ) {
+//         Calculator.powerLevels.currentPowerLevel -= 1;
+//         Calculator.currentIndex += 1;
+//       }
+//       implicitMultiply();
+//       createToken("number", buttonValue, Calculator.currentIndex, true, true);
+//     } else {
+//       createToken("number", buttonValue, Calculator.currentIndex, true, true);
+//     }
+//   });
+// });
+
+function operator(button) {
+  let buttonValue;
+  const lastToken = Calculator.tokenArray[Calculator.currentIndex];
+
+  if (button.localName === "sup") {
+    console.log(button);
+    buttonValue = button.parentElement.getAttribute("data-value");
+  } else {
+    console.log(button);
+    buttonValue = button.getAttribute("data-value");
+  }
+
+  if (
+    lastToken &&
+    (lastToken.type === "number" || lastToken.value === ")") // && lastToken.visibility))
+  ) {
+    if (buttonValue === "^" || buttonValue === "root") {
+      if (buttonValue === "^") {
+        createToken(
+          "operator",
+          buttonValue,
+          Calculator.currentIndex,
+          false,
+          false
+        );
+      } else if (buttonValue === "root") {
+        createToken(
+          "operator",
+          buttonValue,
+          Calculator.currentIndex,
+          true,
+          false
+        );
       }
-    } else if (Calculator.tokenArray.length && lastToken.value === ")") {
+      Calculator.powerLevels.currentPowerLevel += 1;
+      createToken("parenthesis", "(", Calculator.currentIndex, false, false);
+      createToken("parenthesis", ")", Calculator.currentIndex, false, true);
+      Calculator.currentIndex -= 1;
+    } else if (
+      Calculator.powerLevels.currentPowerLevel > 0 &&
+      !Calculator.powerLevels.openParentheses[
+        Calculator.powerLevels.currentPowerLevel
+      ]
+    ) {
       while (
         !Calculator.powerLevels.openParentheses[
           Calculator.powerLevels.currentPowerLevel
@@ -125,89 +230,84 @@ numberButtons.forEach((button) => {
         Calculator.powerLevels.currentPowerLevel -= 1;
         Calculator.currentIndex += 1;
       }
-      implicitMultiply();
-      createToken("number", buttonValue, Calculator.currentIndex, true, true);
+      createToken("operator", buttonValue, Calculator.currentIndex, true, true);
     } else {
-      createToken("number", buttonValue, Calculator.currentIndex, true, true);
+      createToken("operator", buttonValue, Calculator.currentIndex, true, true);
     }
-  });
-});
+  }
+}
 
-document.addEventListener("keydown", (event) => {
-  console.log(event);
-});
+// operatorButtons.forEach((button) => {
+//   button.addEventListener("click", (event) => {
+//     let buttonValue;
+//     const lastToken = Calculator.tokenArray[Calculator.currentIndex];
 
-operatorButtons.forEach((button) => {
-  button.addEventListener("click", (event) => {
-    let buttonValue;
-    const lastToken = Calculator.tokenArray[Calculator.currentIndex];
+//     if (event.target.localName === "sup") {
+//       buttonValue = event.target.parentElement.getAttribute("data-value");
+//     } else {
+//       buttonValue = event.target.getAttribute("data-value");
+//     }
 
-    if (event.target.localName === "sup") {
-      buttonValue = event.target.parentElement.getAttribute("data-value");
-    } else {
-      buttonValue = event.target.getAttribute("data-value");
-    }
-
-    if (
-      lastToken &&
-      (lastToken.type === "number" || lastToken.value === ")") // && lastToken.visibility))
-    ) {
-      if (buttonValue === "^" || buttonValue === "root") {
-        if (buttonValue === "^") {
-          createToken(
-            "operator",
-            buttonValue,
-            Calculator.currentIndex,
-            false,
-            false
-          );
-        } else if (buttonValue === "root") {
-          createToken(
-            "operator",
-            buttonValue,
-            Calculator.currentIndex,
-            true,
-            false
-          );
-        }
-        Calculator.powerLevels.currentPowerLevel += 1;
-        createToken("parenthesis", "(", Calculator.currentIndex, false, false);
-        createToken("parenthesis", ")", Calculator.currentIndex, false, true);
-        Calculator.currentIndex -= 1;
-      } else if (
-        Calculator.powerLevels.currentPowerLevel > 0 &&
-        !Calculator.powerLevels.openParentheses[
-          Calculator.powerLevels.currentPowerLevel
-        ]
-      ) {
-        while (
-          !Calculator.powerLevels.openParentheses[
-            Calculator.powerLevels.currentPowerLevel
-          ] &&
-          Calculator.powerLevels.currentPowerLevel > 0
-        ) {
-          Calculator.powerLevels.currentPowerLevel -= 1;
-          Calculator.currentIndex += 1;
-        }
-        createToken(
-          "operator",
-          buttonValue,
-          Calculator.currentIndex,
-          true,
-          true
-        );
-      } else {
-        createToken(
-          "operator",
-          buttonValue,
-          Calculator.currentIndex,
-          true,
-          true
-        );
-      }
-    }
-  });
-});
+//     if (
+//       lastToken &&
+//       (lastToken.type === "number" || lastToken.value === ")") // && lastToken.visibility))
+//     ) {
+//       if (buttonValue === "^" || buttonValue === "root") {
+//         if (buttonValue === "^") {
+//           createToken(
+//             "operator",
+//             buttonValue,
+//             Calculator.currentIndex,
+//             false,
+//             false
+//           );
+//         } else if (buttonValue === "root") {
+//           createToken(
+//             "operator",
+//             buttonValue,
+//             Calculator.currentIndex,
+//             true,
+//             false
+//           );
+//         }
+//         Calculator.powerLevels.currentPowerLevel += 1;
+//         createToken("parenthesis", "(", Calculator.currentIndex, false, false);
+//         createToken("parenthesis", ")", Calculator.currentIndex, false, true);
+//         Calculator.currentIndex -= 1;
+//       } else if (
+//         Calculator.powerLevels.currentPowerLevel > 0 &&
+//         !Calculator.powerLevels.openParentheses[
+//           Calculator.powerLevels.currentPowerLevel
+//         ]
+//       ) {
+//         while (
+//           !Calculator.powerLevels.openParentheses[
+//             Calculator.powerLevels.currentPowerLevel
+//           ] &&
+//           Calculator.powerLevels.currentPowerLevel > 0
+//         ) {
+//           Calculator.powerLevels.currentPowerLevel -= 1;
+//           Calculator.currentIndex += 1;
+//         }
+//         createToken(
+//           "operator",
+//           buttonValue,
+//           Calculator.currentIndex,
+//           true,
+//           true
+//         );
+//       } else {
+//         createToken(
+//           "operator",
+//           buttonValue,
+//           Calculator.currentIndex,
+//           true,
+//           true
+//         );
+//       }
+//     }
+//   });
+// });
 
 unaryOperatorButton.addEventListener("click", (event) => {
   const buttonValue = event.target.getAttribute("data-value");
