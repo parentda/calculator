@@ -82,19 +82,6 @@ const displayTop = document.querySelector("#display-top");
 const displayBottom = document.querySelector("#display-bottom");
 
 const buttons = document.querySelectorAll("button");
-const numberButtons = document.querySelectorAll("[data-type='number']");
-const decimalButton = document.querySelector("[data-type='decimal']");
-const operatorButtons = document.querySelectorAll("[data-type='operator']");
-const unaryOperatorButton = document.querySelector(
-  "[data-type='unaryOperator']"
-);
-const parenthesisButtons = document.querySelectorAll(
-  "[data-type='parenthesis']"
-);
-const evaluateButton = document.querySelector("[data-type='evaluate']");
-const resetButton = document.querySelector("[data-type='reset']");
-const answerButton = document.querySelector("[data-type='answer']");
-const backspaceButton = document.querySelector("[data-type='backspace']");
 
 buttons.forEach((button) => {
   const buttonFunction = window[button.getAttribute("data-type")];
@@ -138,44 +125,6 @@ function number(button) {
     createToken("number", buttonValue, Calculator.currentIndex, true, true);
   }
 }
-
-// numberButtons.forEach((button) => {
-//   button.addEventListener("click", (event) => {
-//     const buttonValue = event.target.textContent;
-//     const lastToken = Calculator.tokenArray[Calculator.currentIndex];
-//     if (Calculator.justEvaluated) {
-//       lastToken.value = buttonValue;
-//       stringifyTokenArray();
-//     } else if (lastToken && lastToken.type === "number") {
-//       if (
-//         (buttonValue === "0" && lastToken.value === "0") ||
-//         lastToken.value === "ANS"
-//       ) {
-//         // do nothing
-//       } else if (buttonValue !== "0" && lastToken.value === "0") {
-//         lastToken.value = buttonValue;
-//         stringifyTokenArray();
-//       } else {
-//         lastToken.value += buttonValue;
-//         stringifyTokenArray();
-//       }
-//     } else if (Calculator.tokenArray.length && lastToken.value === ")") {
-//       while (
-//         !Calculator.powerLevels.openParentheses[
-//           Calculator.powerLevels.currentPowerLevel
-//         ] &&
-//         Calculator.powerLevels.currentPowerLevel > 0
-//       ) {
-//         Calculator.powerLevels.currentPowerLevel -= 1;
-//         Calculator.currentIndex += 1;
-//       }
-//       implicitMultiply();
-//       createToken("number", buttonValue, Calculator.currentIndex, true, true);
-//     } else {
-//       createToken("number", buttonValue, Calculator.currentIndex, true, true);
-//     }
-//   });
-// });
 
 function operator(button) {
   let buttonValue;
@@ -235,78 +184,6 @@ function operator(button) {
   }
 }
 
-// operatorButtons.forEach((button) => {
-//   button.addEventListener("click", (event) => {
-//     let buttonValue;
-//     const lastToken = Calculator.tokenArray[Calculator.currentIndex];
-
-//     if (event.target.localName === "sup") {
-//       buttonValue = event.target.parentElement.getAttribute("data-value");
-//     } else {
-//       buttonValue = event.target.getAttribute("data-value");
-//     }
-
-//     if (
-//       lastToken &&
-//       (lastToken.type === "number" || lastToken.value === ")") // && lastToken.visibility))
-//     ) {
-//       if (buttonValue === "^" || buttonValue === "root") {
-//         if (buttonValue === "^") {
-//           createToken(
-//             "operator",
-//             buttonValue,
-//             Calculator.currentIndex,
-//             false,
-//             false
-//           );
-//         } else if (buttonValue === "root") {
-//           createToken(
-//             "operator",
-//             buttonValue,
-//             Calculator.currentIndex,
-//             true,
-//             false
-//           );
-//         }
-//         Calculator.powerLevels.currentPowerLevel += 1;
-//         createToken("parenthesis", "(", Calculator.currentIndex, false, false);
-//         createToken("parenthesis", ")", Calculator.currentIndex, false, true);
-//         Calculator.currentIndex -= 1;
-//       } else if (
-//         Calculator.powerLevels.currentPowerLevel > 0 &&
-//         !Calculator.powerLevels.openParentheses[
-//           Calculator.powerLevels.currentPowerLevel
-//         ]
-//       ) {
-//         while (
-//           !Calculator.powerLevels.openParentheses[
-//             Calculator.powerLevels.currentPowerLevel
-//           ] &&
-//           Calculator.powerLevels.currentPowerLevel > 0
-//         ) {
-//           Calculator.powerLevels.currentPowerLevel -= 1;
-//           Calculator.currentIndex += 1;
-//         }
-//         createToken(
-//           "operator",
-//           buttonValue,
-//           Calculator.currentIndex,
-//           true,
-//           true
-//         );
-//       } else {
-//         createToken(
-//           "operator",
-//           buttonValue,
-//           Calculator.currentIndex,
-//           true,
-//           true
-//         );
-//       }
-//     }
-//   });
-// });
-
 function unaryOperator(button) {
   const buttonValue = button.getAttribute("data-value");
   const lastToken = Calculator.tokenArray[Calculator.currentIndex];
@@ -340,126 +217,16 @@ function unaryOperator(button) {
   }
 }
 
-// unaryOperatorButton.addEventListener("click", (event) => {
-//   const buttonValue = event.target.getAttribute("data-value");
-//   const lastToken = Calculator.tokenArray[Calculator.currentIndex];
-//   const secondLastToken = Calculator.tokenArray[Calculator.currentIndex - 1];
+function parenthesis(button) {
+  const buttonValue = button.textContent;
+  const lastToken = Calculator.tokenArray[Calculator.currentIndex];
 
-//   if (
-//     !lastToken ||
-//     (lastToken.type === "operator" && lastToken.notation === "infix") ||
-//     lastToken.value === "("
-//   ) {
-//     createToken("operator", buttonValue, Calculator.currentIndex, true, true);
-//   } else if (lastToken.value === ")") {
-//     implicitMultiply();
-//     createToken("operator", buttonValue, Calculator.currentIndex, true, true);
-//   } else if (lastToken.notation === "prefix") {
-//     deleteToken(Calculator.currentIndex);
-//     stringifyTokenArray();
-//   } else if (lastToken.type === "number") {
-//     if (secondLastToken && secondLastToken.notation === "prefix") {
-//       deleteToken(Calculator.currentIndex - 1);
-//       stringifyTokenArray();
-//     } else {
-//       createToken(
-//         "operator",
-//         buttonValue,
-//         Calculator.currentIndex - 1,
-//         true,
-//         true
-//       );
-//     }
-//   }
-// });
-
-parenthesisButtons.forEach((button) => {
-  button.addEventListener("click", (event) => {
-    const buttonValue = event.target.textContent;
-    const lastToken = Calculator.tokenArray[Calculator.currentIndex];
-
-    if (buttonValue === "(") {
-      if (
-        Calculator.justEvaluated ||
-        (Calculator.tokenArray.length === 1 && lastToken.value === "0")
-      ) {
-        deleteToken(Calculator.currentIndex);
-        createToken(
-          "parenthesis",
-          buttonValue,
-          Calculator.currentIndex,
-          true,
-          true
-        );
-        if (
-          !Calculator.powerLevels.openParentheses[
-            Calculator.powerLevels.currentPowerLevel
-          ]
-        ) {
-          Calculator.powerLevels.openParentheses[
-            Calculator.powerLevels.currentPowerLevel
-          ] = 0;
-        }
-        Calculator.powerLevels.openParentheses[
-          Calculator.powerLevels.currentPowerLevel
-        ] += 1;
-        Calculator.openParentheses += 1;
-        stringifyTokenArray();
-      } else {
-        if (
-          Calculator.powerLevels.currentPowerLevel > 0 &&
-          !Calculator.powerLevels.openParentheses[
-            Calculator.powerLevels.currentPowerLevel
-          ] &&
-          Calculator.tokenArray[Calculator.currentIndex].value !== "("
-        ) {
-          while (
-            !Calculator.powerLevels.openParentheses[
-              Calculator.powerLevels.currentPowerLevel
-            ] &&
-            Calculator.powerLevels.currentPowerLevel > 0
-          ) {
-            Calculator.powerLevels.currentPowerLevel -= 1;
-            Calculator.currentIndex += 1;
-          }
-        }
-        if (
-          lastToken &&
-          (lastToken.type === "number" || lastToken.value === ")")
-        ) {
-          implicitMultiply();
-        }
-
-        if (
-          !Calculator.powerLevels.openParentheses[
-            Calculator.powerLevels.currentPowerLevel
-          ]
-        ) {
-          Calculator.powerLevels.openParentheses[
-            Calculator.powerLevels.currentPowerLevel
-          ] = 0;
-        }
-        Calculator.powerLevels.openParentheses[
-          Calculator.powerLevels.currentPowerLevel
-        ] += 1;
-        Calculator.openParentheses += 1;
-        // Calculator.openParentheses += 1;
-        createToken(
-          "parenthesis",
-          buttonValue,
-          Calculator.currentIndex,
-          true,
-          true
-        );
-      }
-    } else if (
-      buttonValue === ")" &&
-      Calculator.powerLevels.openParentheses[
-        Calculator.powerLevels.currentPowerLevel
-      ] > 0 &&
-      lastToken.value !== "(" &&
-      lastToken.type !== "operator"
+  if (buttonValue === "(") {
+    if (
+      Calculator.justEvaluated ||
+      (Calculator.tokenArray.length === 1 && lastToken.value === "0")
     ) {
+      deleteToken(Calculator.currentIndex);
       createToken(
         "parenthesis",
         buttonValue,
@@ -467,37 +234,58 @@ parenthesisButtons.forEach((button) => {
         true,
         true
       );
+      if (
+        !Calculator.powerLevels.openParentheses[
+          Calculator.powerLevels.currentPowerLevel
+        ]
+      ) {
+        Calculator.powerLevels.openParentheses[
+          Calculator.powerLevels.currentPowerLevel
+        ] = 0;
+      }
       Calculator.powerLevels.openParentheses[
         Calculator.powerLevels.currentPowerLevel
-      ] -= 1;
-      Calculator.openParentheses -= 1;
-      // if (
-      //   !Calculator.powerLevels.openParentheses[
-      //     Calculator.powerLevels.currentPowerLevel
-      //   ] &&
-      //   Calculator.powerLevels.currentPowerLevel > 0
-      // ) {
-      //   Calculator.powerLevels.currentPowerLevel -= 1;
-      //   Calculator.currentIndex += 1;
-      // }
-    } else if (
-      buttonValue === ")" &&
-      !Calculator.powerLevels.openParentheses[
-        Calculator.powerLevels.currentPowerLevel
-      ] &&
-      Calculator.openParentheses &&
-      lastToken.value !== "(" &&
-      lastToken.type !== "operator"
-    ) {
-      while (
+      ] += 1;
+      Calculator.openParentheses += 1;
+      stringifyTokenArray();
+    } else {
+      if (
+        Calculator.powerLevels.currentPowerLevel > 0 &&
         !Calculator.powerLevels.openParentheses[
           Calculator.powerLevels.currentPowerLevel
         ] &&
-        Calculator.powerLevels.currentPowerLevel > 0
+        Calculator.tokenArray[Calculator.currentIndex].value !== "("
       ) {
-        Calculator.powerLevels.currentPowerLevel -= 1;
-        Calculator.currentIndex += 1;
+        while (
+          !Calculator.powerLevels.openParentheses[
+            Calculator.powerLevels.currentPowerLevel
+          ] &&
+          Calculator.powerLevels.currentPowerLevel > 0
+        ) {
+          Calculator.powerLevels.currentPowerLevel -= 1;
+          Calculator.currentIndex += 1;
+        }
       }
+      if (
+        lastToken &&
+        (lastToken.type === "number" || lastToken.value === ")")
+      ) {
+        implicitMultiply();
+      }
+
+      if (
+        !Calculator.powerLevels.openParentheses[
+          Calculator.powerLevels.currentPowerLevel
+        ]
+      ) {
+        Calculator.powerLevels.openParentheses[
+          Calculator.powerLevels.currentPowerLevel
+        ] = 0;
+      }
+      Calculator.powerLevels.openParentheses[
+        Calculator.powerLevels.currentPowerLevel
+      ] += 1;
+      Calculator.openParentheses += 1;
       createToken(
         "parenthesis",
         buttonValue,
@@ -505,19 +293,59 @@ parenthesisButtons.forEach((button) => {
         true,
         true
       );
-      Calculator.powerLevels.openParentheses[
-        Calculator.powerLevels.currentPowerLevel
-      ] -= 1;
-      Calculator.openParentheses -= 1;
     }
-    // Calculator.powerLevels.openParentheses[
-    //   Calculator.powerLevels.currentPowerLevel
-    // ] -= 1;
-    // createToken("parenthesis", buttonValue, 0, true);
-  });
-});
+  } else if (
+    buttonValue === ")" &&
+    Calculator.powerLevels.openParentheses[
+      Calculator.powerLevels.currentPowerLevel
+    ] > 0 &&
+    lastToken.value !== "(" &&
+    lastToken.type !== "operator"
+  ) {
+    createToken(
+      "parenthesis",
+      buttonValue,
+      Calculator.currentIndex,
+      true,
+      true
+    );
+    Calculator.powerLevels.openParentheses[
+      Calculator.powerLevels.currentPowerLevel
+    ] -= 1;
+    Calculator.openParentheses -= 1;
+  } else if (
+    buttonValue === ")" &&
+    !Calculator.powerLevels.openParentheses[
+      Calculator.powerLevels.currentPowerLevel
+    ] &&
+    Calculator.openParentheses &&
+    lastToken.value !== "(" &&
+    lastToken.type !== "operator"
+  ) {
+    while (
+      !Calculator.powerLevels.openParentheses[
+        Calculator.powerLevels.currentPowerLevel
+      ] &&
+      Calculator.powerLevels.currentPowerLevel > 0
+    ) {
+      Calculator.powerLevels.currentPowerLevel -= 1;
+      Calculator.currentIndex += 1;
+    }
+    createToken(
+      "parenthesis",
+      buttonValue,
+      Calculator.currentIndex,
+      true,
+      true
+    );
+    Calculator.powerLevels.openParentheses[
+      Calculator.powerLevels.currentPowerLevel
+    ] -= 1;
+    Calculator.openParentheses -= 1;
+  }
+}
 
-evaluateButton.addEventListener("click", () => {
+function evaluate(button) {
   if (!Calculator.tokenArray.length) {
     return;
   }
@@ -547,15 +375,15 @@ evaluateButton.addEventListener("click", () => {
   const parsedArray = parseTokenArray(Calculator.tokenArray);
   Calculator.ANS = evaluateParsedArray(parsedArray);
 
-  reset(false, false);
+  resetCalc();
   Calculator.display.topDisplayText = `&lrm;${Calculator.display.stringExpression} =&lrm;`;
   displayTop.innerHTML = Calculator.display.topDisplayText;
   initializeTokenArray("number", Calculator.ANS);
   stringifyTokenArray();
   Calculator.justEvaluated = true;
-});
+}
 
-backspaceButton.addEventListener("click", () => {
+function backspace(button) {
   let maxID;
   if (Calculator.tokenArray.length) {
     maxID = Calculator.tokenArray.reduce((a, b) => (a.id > b.id ? a : b)).id;
@@ -571,7 +399,6 @@ backspaceButton.addEventListener("click", () => {
           0,
           -1
         );
-        // stringifyTokenArray();
         break;
       } else {
         Calculator.currentIndex = i;
@@ -594,15 +421,6 @@ backspaceButton.addEventListener("click", () => {
         ) {
           Calculator.currentIndex -= 1;
         }
-        // if (
-        //   Calculator.tokenArray[Calculator.currentIndex - 1] &&
-        //   Calculator.tokenArray[Calculator.currentIndex - 1].value === ")" &&
-        //   !Calculator.tokenArray[Calculator.currentIndex - 1].visibility
-        // ) {
-        //   Calculator.currentIndex -= 1;
-        // }
-        // Calculator.powerLevels.currentPowerLevel = deletedToken.powerLevel;
-        // stringifyTokenArray();
       }
     }
   }
@@ -610,19 +428,19 @@ backspaceButton.addEventListener("click", () => {
     initializeTokenArray("number", "0");
   }
   stringifyTokenArray();
-});
+}
 
-resetButton.addEventListener("click", () => {
-  reset(false, false);
+function reset(button) {
+  resetCalc();
   Calculator.display.topDisplayText = `&lrm;ANS = ${Calculator.ANS}&lrm;`;
   displayTop.innerHTML = Calculator.display.topDisplayText;
   initializeTokenArray("number", "0");
   stringifyTokenArray();
   Calculator.justEvaluated = true;
-});
+}
 
-decimalButton.addEventListener("click", (event) => {
-  const buttonValue = event.target.textContent;
+function decimal(button) {
+  const buttonValue = button.textContent;
   const lastToken = Calculator.tokenArray[Calculator.currentIndex];
   if (
     lastToken &&
@@ -646,13 +464,10 @@ decimalButton.addEventListener("click", (event) => {
       true
     );
   }
-});
+}
 
-answerButton.addEventListener("click", (event) => {
-  // if (Calculator.ANS) {
-  //   createToken("number", "ANS", Calculator.currentIndex, true, true);
-  // }
-  const buttonValue = event.target.textContent;
+function answer(button) {
+  const buttonValue = button.textContent;
   const lastToken = Calculator.tokenArray[Calculator.currentIndex];
   if (Calculator.justEvaluated) {
     lastToken.value = buttonValue;
@@ -677,7 +492,7 @@ answerButton.addEventListener("click", (event) => {
   } else {
     createToken("number", buttonValue, Calculator.currentIndex, true, true);
   }
-});
+}
 
 function createToken(tokenType, tokenValue, index, visibility, incrementID) {
   let token = {};
@@ -804,26 +619,15 @@ function implicitMultiply() {
   createToken("operator", "*", Calculator.currentIndex, false, false);
 }
 
-function reset(resetANS, resetTopDisplay) {
+function resetCalc() {
   Calculator.currentID = 0;
   Calculator.currentIndex = -1;
   Calculator.tokenArray = [];
-  // Calculator.display.bottomDisplayText = "";
   Calculator.display.stringArray = [];
-  // Calculator.display.stringExpression = "";
   Calculator.display.currentIndex = 0;
   Calculator.powerLevels.currentPowerLevel = 0;
   Calculator.powerLevels.openParentheses = [];
   Calculator.openParentheses = 0;
-  // displayTop.textContent = Calculator.display.topDisplayText;
-  // displayBottom.textContent = Calculator.display.bottomDisplayText;
-
-  if (resetANS) {
-    Calculator.ANS = 0;
-  }
-  if (resetTopDisplay) {
-    Calculator.display.topDisplayText = "";
-  }
 }
 
 function displayStringArray() {
