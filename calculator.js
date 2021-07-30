@@ -90,6 +90,15 @@ buttons.forEach((button) => {
   });
 });
 
+window.addEventListener("keydown", (event) => {
+  const key = event.key;
+  const button = document.querySelector(`button[data-key~="${key}"]`);
+  if (button) {
+    const buttonFunction = window[button.getAttribute("data-type")];
+    buttonFunction(button);
+  }
+});
+
 function number(button) {
   const buttonValue = button.textContent;
   const lastToken = Calculator.tokenArray[Calculator.currentIndex];
@@ -741,12 +750,8 @@ function stringifyTokenArray() {
           0,
           Calculator.tempCharacter
         );
-        // Calculator.display.indexFromEnd += 1;
       }
     } else if (token.visibility) {
-      // if (token.powerLevel === 0) {
-      //   Calculator.display.currentIndex = Calculator.display.stringArray.length;
-      // }
       if (
         Calculator.tokenArray[index - 1] &&
         ((Calculator.tokenArray[index - 1].value === "(" &&
