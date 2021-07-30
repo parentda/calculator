@@ -2,6 +2,7 @@ const Calculator = {
   currentID: 0,
   currentIndex: -1,
   justEvaluated: false,
+  currentButton: undefined,
   tokenArray: [],
   display: {
     currentIndex: 0,
@@ -94,8 +95,17 @@ window.addEventListener("keydown", (event) => {
   const key = event.key;
   const button = document.querySelector(`button[data-key~="${key}"]`);
   if (button) {
+    button.classList.add("key-press");
+    Calculator.currentButton = button;
     const buttonFunction = window[button.getAttribute("data-type")];
     buttonFunction(button);
+  }
+});
+
+window.addEventListener("keyup", () => {
+  if (Calculator.currentButton) {
+    Calculator.currentButton.classList.remove("key-press");
+    Calculator.currentButton = undefined;
   }
 });
 

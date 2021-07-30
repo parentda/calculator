@@ -1,12 +1,23 @@
 :root {
   font-family: Menlo;
   font-size: 20px;
-  --display-height: 100px;
+  --calc-width: 600px;
+  --row-height: 100px;
+  --display-height: 135px;
+  --display-buffer: 55px;
+  --font-button: 25px;
+  --font-topDisplay: 20px;
+  --font-bottomDisplay: 35px;
+  --color-background: white;
+  --color-display: white;
+  --color-font: ;
+  --color-calc: ;
 }
 
 body,
 html {
   height: 100%;
+  background-color: var(--color-background);
 }
 
 main {
@@ -19,33 +30,55 @@ main {
 
 #calculator {
   display: grid;
-  grid-template-rows: var(--display-height) repeat(4, auto);
+  grid-template-rows: Calc(var(--display-height) + var(--display-buffer)) repeat(
+      4,
+      var(--row-height)
+    );
   grid-template-columns: repeat(6, auto);
-  grid-gap: 5px 5px;
-  padding: 20px;
-  border-radius: 20px;
+  /* grid-gap: 10px 10px; */
+  padding: 25px;
+  border-radius: 25px;
   background-color: aquamarine;
-  height: 500px;
-  width: 600px;
+  height: Calc(
+    var(--row-height) * 4 + var(--display-height) + var(--display-buffer)
+  );
+  width: var(--calc-width);
 }
 
 #display {
   grid-row: 1 / 1;
   grid-column: 1 / 7;
-  /* display: flex;
-  flex-direction: column; */
+  background-color: var(--color-display);
+  justify-self: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   /* height: 1em; */
   height: var(--display-height);
-  width: 600px;
+  width: Calc(var(--calc-width) - 60px);
+  /* height: var(--display-height); */
+  /* width: var(--calc-width); */
+  /* border: 5px solid black; */
+  border-radius: 10px;
   /* direction: rtl; */
   /* white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis; */
+  padding: 10px 20px 10px 20px;
+  margin-top: 10px;
 }
 
 #display-top {
   /* height: auto; */
   /* text-align: right; */
+  font-size: var(--font-topDisplay);
+}
+
+#display-bottom {
+  /* height: auto; */
+  /* text-align: right; */
+  font-size: var(--font-bottomDisplay);
+  border-top: 1px solid black;
 }
 
 /* #wrapper {
@@ -64,7 +97,8 @@ main {
   /* overflow-y: visible; */
   text-overflow: ellipsis;
   margin: 0;
-  padding: 20px 0 20px 0;
+  padding: 1em 0 0.2em 0;
+  word-spacing: -0.5ch;
 }
 
 sup {
@@ -76,9 +110,21 @@ sup {
 }
 
 button {
-  width: 75px;
-  height: 75px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   justify-self: center;
   align-self: center;
+  font-size: var(--font-button);
+  border: 2px solid black;
+  /* border: none; */
+}
+
+button:hover {
+  background-color: pink;
+}
+
+button:active,
+.key-press {
+  background-color: orange;
 }
