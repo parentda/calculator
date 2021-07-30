@@ -86,7 +86,7 @@ const numberButtons = document.querySelectorAll("[data-type='number']");
 const decimalButton = document.querySelector("[data-type='decimal']");
 const operatorButtons = document.querySelectorAll("[data-type='operator']");
 const unaryOperatorButton = document.querySelector(
-  "[data-type='unary-operator']"
+  "[data-type='unaryOperator']"
 );
 const parenthesisButtons = document.querySelectorAll(
   "[data-type='parenthesis']"
@@ -182,10 +182,8 @@ function operator(button) {
   const lastToken = Calculator.tokenArray[Calculator.currentIndex];
 
   if (button.localName === "sup") {
-    console.log(button);
     buttonValue = button.parentElement.getAttribute("data-value");
   } else {
-    console.log(button);
     buttonValue = button.getAttribute("data-value");
   }
 
@@ -309,8 +307,8 @@ function operator(button) {
 //   });
 // });
 
-unaryOperatorButton.addEventListener("click", (event) => {
-  const buttonValue = event.target.getAttribute("data-value");
+function unaryOperator(button) {
+  const buttonValue = button.getAttribute("data-value");
   const lastToken = Calculator.tokenArray[Calculator.currentIndex];
   const secondLastToken = Calculator.tokenArray[Calculator.currentIndex - 1];
 
@@ -340,7 +338,40 @@ unaryOperatorButton.addEventListener("click", (event) => {
       );
     }
   }
-});
+}
+
+// unaryOperatorButton.addEventListener("click", (event) => {
+//   const buttonValue = event.target.getAttribute("data-value");
+//   const lastToken = Calculator.tokenArray[Calculator.currentIndex];
+//   const secondLastToken = Calculator.tokenArray[Calculator.currentIndex - 1];
+
+//   if (
+//     !lastToken ||
+//     (lastToken.type === "operator" && lastToken.notation === "infix") ||
+//     lastToken.value === "("
+//   ) {
+//     createToken("operator", buttonValue, Calculator.currentIndex, true, true);
+//   } else if (lastToken.value === ")") {
+//     implicitMultiply();
+//     createToken("operator", buttonValue, Calculator.currentIndex, true, true);
+//   } else if (lastToken.notation === "prefix") {
+//     deleteToken(Calculator.currentIndex);
+//     stringifyTokenArray();
+//   } else if (lastToken.type === "number") {
+//     if (secondLastToken && secondLastToken.notation === "prefix") {
+//       deleteToken(Calculator.currentIndex - 1);
+//       stringifyTokenArray();
+//     } else {
+//       createToken(
+//         "operator",
+//         buttonValue,
+//         Calculator.currentIndex - 1,
+//         true,
+//         true
+//       );
+//     }
+//   }
+// });
 
 parenthesisButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
