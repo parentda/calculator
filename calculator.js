@@ -103,10 +103,11 @@ window.addEventListener("keydown", (event) => {
 });
 
 window.addEventListener("keyup", () => {
-  if (Calculator.currentButton) {
-    Calculator.currentButton.classList.remove("key-press");
-    Calculator.currentButton = undefined;
-  }
+  const activeButtons = document.querySelectorAll(".key-press");
+  activeButtons.forEach((button) => {
+    button.classList.remove("key-press");
+  });
+  Calculator.currentButton = undefined;
 });
 
 function number(button) {
